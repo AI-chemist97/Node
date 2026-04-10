@@ -117,7 +117,7 @@ const QUESTIONS = [
    1.5. 서버 연결 설정 (추가됨)
 ────────────────────────────────────────── */
 // config.js가 없을 경우를 대비한 안전장치
-const API_BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : "";
+const API_BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : "https://node-t696.onrender.com";
 
 async function fetchQuestionsFromServer() {
   if (!API_BASE_URL) return; // 주소 없으면 기존 로컬 데이터 사용
