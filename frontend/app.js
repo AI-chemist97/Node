@@ -114,6 +114,30 @@ const QUESTIONS = [
 ];
 
 /* ──────────────────────────────────────────
+   1.5. 서버 연결 설정 (추가됨)
+────────────────────────────────────────── */
+// config.js가 없을 경우를 대비한 안전장치
+const API_BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : "";
+
+async function fetchQuestionsFromServer() {
+  if (!API_BASE_URL) return; // 주소 없으면 기존 로컬 데이터 사용
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/questions`);
+    const serverData = await response.json();
+    
+    if (serverData && serverData.length > 0) {
+      // 서버에서 받은 데이터로 QUESTIONS 배열을 덮어씌웁니다.
+      // 데이터 형식이 EdNet 규격일 경우 매핑 로직이 추가로 필요할 수 있습니다.
+      console.log("서버 데이터 로드 완료:", serverData);
+      // QUESTIONS.push(...serverData); // 기존 데이터에 추가할 경우
+    }
+  } catch (error) {
+    appendLog('[ERROR] 서버 연결 실패. 로컬 모드로 동작합니다.', 'error');
+  }
+}
+
+/* ──────────────────────────────────────────
    2. 전역 상태
 ────────────────────────────────────────── */
 let currentQ = 0;
@@ -677,6 +701,7 @@ function startAmbientLogs() {
 ────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   setCurrentDate();
+  fetchQuestionsFromServer();
   buildRiskList();
   animateSyncBars();
   startAmbientLogs();

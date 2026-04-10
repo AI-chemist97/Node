@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 venv/
 .env
+config.js
 
 # 운영체제 관련
 .DS_Store
