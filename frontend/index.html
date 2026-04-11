@@ -1,645 +1,1154 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TWIN EDU — AI 디지털 트윈 학습 플랫폼</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-<!-- ========== SIDEBAR ========== -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <span class="logo-icon">⬡</span>
-    <span class="logo-text">TWIN<span class="logo-accent">EDU</span></span>
-  </div>
-<div style="padding: 10px 20px;">
-  <input type="text" id="userInputId" placeholder="유저 ID (예: 115)" 
-         style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 12px;">
-  <button onclick="loadTargetUser()" 
-          style="width: 100%; margin-top: 5px; padding: 8px; background: var(--blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-    AI 데이터 동기화
-  </button>
-  
-</div>
-  <div class="sidebar-profile" onclick="openProfileModal()" style="cursor: pointer;">
-    <div class="profile-avatar">
-      <span id="profileInitial">김</span>
-      <div class="sync-ring"></div>
-    </div>
-    <div class="profile-info">
-      <p class="profile-name" id="profileName">김노드</p>
-      <p class="profile-grade" id="profileGrade">고등학교 2학년</p>
-    </div>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">학습 관리</div>
-    <button class="nav-item active" onclick="switchTab('dashboard')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      <span>대시보드</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('simulator')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <span>AI 시뮬레이터</span>
-      <span class="nav-badge">NEW</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('report')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <span>분석 리포트</span>
-    </button>
-    <div class="nav-section-label" style="margin-top:16px;">설정</div>
-    <button class="nav-item" onclick="switchTab('settings')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      <span>트윈 설정</span>
-    </button>
-  </nav>
-
-  <div class="sidebar-footer">
-    <div class="twin-status">
-      <span class="status-dot"></span>
-      <span>트윈 활성 중</span>
-    </div>
-  </div>
-</aside>
-
-<!-- ========== MAIN CONTENT ========== -->
-<main class="main-content">
-
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="topbar-tabs">
-      <button class="tab-btn active" onclick="switchTab('dashboard')">대시보드</button>
-      <button class="tab-btn" onclick="switchTab('simulator')">AI 시뮬레이터</button>
-      <button class="tab-btn" onclick="switchTab('report')">분석 리포트</button>
-      <button class="tab-btn" onclick="switchTab('settings')">트윈 설정</button>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-date" id="currentDate"></div>
-      <div class="topbar-notify">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="notify-dot"></span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TWIN EDU — AI 디지털 트윈 학습 플랫폼</title>
+    <link rel="icon" type="image/png" href="/favicon.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">TWIN<span class="logo-accent">EDU</span></span>
       </div>
-    </div>
-  </header>
-
-  <!-- ===== TAB: DASHBOARD ===== -->
-  <section class="tab-content active" id="tab-dashboard">
-
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <div class="hero-left">
-        <div class="hero-tag">
-          <span class="tag-pulse"></span>
-          오늘 밤 시뮬레이션 완료
+      <div style="padding: 10px 20px">
+        <input
+          type="text"
+          id="userInputId"
+          placeholder="유저 ID (예: 115)"
+          style="
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+          "
+        />
+        <button
+          onclick="loadTargetUser()"
+          style="
+            width: 100%;
+            margin-top: 5px;
+            padding: 8px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+          "
+        >
+          AI 데이터 동기화
+        </button>
+      </div>
+      <div
+        class="sidebar-profile"
+        onclick="openProfileModal()"
+        style="cursor: pointer"
+      >
+        <div class="profile-avatar">
+          <span id="profileInitial">김</span>
+          <div class="sync-ring"></div>
         </div>
-        <h1 class="hero-title">
-          김노드 님의 트윈이<br/>
-          <span class="hero-accent">3개 오답 위험</span>을 예보했습니다
-        </h1>
-        <p class="hero-sub">AI 분신이 오늘 수학 단원 시뮬레이션을 완료했습니다.<br/>지금 바로 위험 구간을 확인하고 선제 학습을 시작하세요.</p>
-        <div class="hero-actions">
-          <button class="btn-primary" onclick="switchTab('simulator')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            시뮬레이터 시작
+        <div class="profile-info">
+          <p class="profile-name" id="profileName">김노드</p>
+          <p class="profile-grade" id="profileGrade">고등학교 2학년</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">학습 관리</div>
+        <button class="nav-item active" onclick="switchTab('dashboard')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          <span>대시보드</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('simulator')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          <span>AI 시뮬레이터</span>
+          <span class="nav-badge">NEW</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('report')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          <span>분석 리포트</span>
+        </button>
+        <div class="nav-section-label" style="margin-top: 16px">설정</div>
+        <button class="nav-item" onclick="switchTab('settings')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"
+            />
+          </svg>
+          <span>트윈 설정</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="twin-status">
+          <span class="status-dot"></span>
+          <span>트윈 활성 중</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-tabs">
+          <button class="tab-btn active" onclick="switchTab('dashboard')">
+            대시보드
           </button>
-          <button class="btn-secondary">리포트 보기</button>
-        </div>
-      </div>
-<div class="hero-right">
-  <div class="twin-orb-container" style="position: relative; width: 300px; height: 300px;">
-    <canvas id="userRadarChart" style="position: absolute; z-index: 1;"></canvas>
-    
-    <div class="orb-inner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; background: rgba(255,255,255,0.1); border: none;">
-      <span class="orb-value" id="syncPercent">87</span>
-      <span class="orb-unit">%</span>
-    </div>
-  </div>
-</div>
-    </div>
-
-    <!-- Stats Row -->
-    <div class="stats-row">
-      <div class="stat-card stat-blue">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="stat-body">
-          <p class="stat-label">정답 예측 건수</p>
-          <p class="stat-value" id="correctCount">12</p>
-          <p class="stat-change positive">+2 어제 대비</p>
-        </div>
-      </div>
-      <div class="stat-card stat-red">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="stat-body">
-          <p class="stat-label">오답 위험 건수</p>
-          <p class="stat-value" id="riskCount">3</p>
-          <p class="stat-change negative">주의 필요</p>
-        </div>
-      </div>
-      <div class="stat-card stat-purple">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="stat-body">
-          <p class="stat-label">오늘 학습 시간</p>
-          <p class="stat-value">2<span style="font-size:1rem;font-weight:500">h 34m</span></p>
-          <p class="stat-change positive">목표 달성 중</p>
-        </div>
-      </div>
-      <div class="stat-card stat-green">
-        <div class="stat-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="stat-body">
-          <p class="stat-label">트윈 싱크율</p>
-          <p class="stat-value">87<span style="font-size:1rem;font-weight:500">%</span></p>
-          <p class="stat-change positive">+5% 이번 주</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Twin Sync Bar -->
-    <div class="section-card">
-      <div class="card-header">
-        <h2 class="card-title">트윈 싱크 현황</h2>
-        <span class="card-badge">실시간</span>
-      </div>
-      <div class="sync-bars">
-        <div class="sync-bar-item">
-          <div class="sync-bar-label">
-            <span>수학 (미적분)</span>
-            <span class="sync-bar-pct">92%</span>
-          </div>
-          <div class="sync-bar-track">
-            <div class="sync-bar-fill" data-width="92" style="background: #2563eb;"></div>
-          </div>
-        </div>
-        <div class="sync-bar-item">
-          <div class="sync-bar-label">
-            <span>수학 (확률과 통계)</span>
-            <span class="sync-bar-pct">78%</span>
-          </div>
-          <div class="sync-bar-track">
-            <div class="sync-bar-fill" data-width="78" style="background: #7c3aed;"></div>
-          </div>
-        </div>
-        <div class="sync-bar-item">
-          <div class="sync-bar-label">
-            <span>수학 (수열)</span>
-            <span class="sync-bar-pct">85%</span>
-          </div>
-          <div class="sync-bar-track">
-            <div class="sync-bar-fill" data-width="85" style="background: #059669;"></div>
-          </div>
-        </div>
-        <div class="sync-bar-item">
-          <div class="sync-bar-label">
-            <span>수학 (벡터)</span>
-            <span class="sync-bar-pct">61%</span>
-          </div>
-          <div class="sync-bar-track">
-            <div class="sync-bar-fill" data-width="61" style="background: #d97706;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Risk Alerts -->
-    <div class="two-col-grid">
-      <div class="section-card">
-        <div class="card-header">
-          <h2 class="card-title">위험 알림 <span class="risk-blink">●</span></h2>
-          <span class="card-badge badge-red">3건</span>
-        </div>
-        <div class="risk-list" id="riskList">
-          <!-- JS로 동적 생성 -->
-        </div>
-      </div>
-
-      <div class="section-card">
-        <div class="card-header">
-          <h2 class="card-title">AI 학습 패턴 분석</h2>
-        </div>
-        <div class="pattern-list">
-          <div class="pattern-item">
-            <div class="pattern-icon pattern-warn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-            </div>
-            <div class="pattern-body">
-              <p class="pattern-title">풀이 시간 이상 감지</p>
-              <p class="pattern-desc">Q.05 평균 풀이 시간 4분 초과 — 개념 재확인 필요</p>
-            </div>
-          </div>
-          <div class="pattern-item">
-            <div class="pattern-icon pattern-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </div>
-            <div class="pattern-body">
-              <p class="pattern-title">반복 오답 유형 감지</p>
-              <p class="pattern-desc">치환 적분 유형 — 최근 3회 연속 오답 패턴</p>
-            </div>
-          </div>
-          <div class="pattern-item">
-            <div class="pattern-icon pattern-ok">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div class="pattern-body">
-              <p class="pattern-title">강점 유형 확인</p>
-              <p class="pattern-desc">수열의 극한 — 정답률 94%, 트윈 싱크 최고 수준</p>
-            </div>
-          </div>
-          <div class="pattern-item">
-            <div class="pattern-icon pattern-warn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-            </div>
-            <div class="pattern-body">
-              <p class="pattern-title">야간 집중도 저하</p>
-              <p class="pattern-desc">오후 10시 이후 오답률 23% 상승 — 학습 시간대 조정 권장</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ===== TAB: SIMULATOR ===== -->
-  <section class="tab-content" id="tab-simulator">
-
-    <div class="sim-layout">
-
-      <!-- LEFT: Quiz Area -->
-      <div class="sim-left">
-        <div class="sim-header">
-          <div class="sim-title-row">
-            <div>
-              <h2 class="sim-title">AI 시뮬레이터</h2>
-              <p class="sim-subtitle">트윈이 실시간으로 당신의 풀이를 분석합니다</p>
-            </div>
-            <div class="sim-nav-btns">
-              <button class="sim-nav-btn" id="prevBtn" onclick="prevQuestion()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-              <span class="sim-nav-counter" id="qCounter">1 / 5</span>
-              <button class="sim-nav-btn" id="nextBtn" onclick="nextQuestion()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step Indicator -->
-          <div class="step-indicator" id="stepIndicator">
-            <!-- JS로 동적 생성 -->
-          </div>
-        </div>
-
-        <!-- Question Card -->
-        <div class="question-card">
-          <div class="q-meta-row">
-            <span class="q-num" id="qNum">Q.01</span>
-            <span class="q-type" id="qType">미적분 · 치환적분</span>
-            <span class="q-risk-badge" id="qRiskBadge">위험도 <strong id="qRiskVal">72</strong>%</span>
-          </div>
-          <div class="q-title" id="qTitle">문제를 불러오는 중...</div>
-          <div class="q-formula-box" id="qFormula"></div>
-          <div class="q-options" id="qOptions">
-            <!-- JS로 동적 생성 -->
-          </div>
-          <div class="q-result-msg" id="qResultMsg"></div>
-        </div>
-
-        <!-- AI Forecast -->
-        <div class="forecast-card">
-          <div class="forecast-header">
-            <span class="forecast-icon">⚡</span>
-            <span class="forecast-title">AI 오답 예보</span>
-          </div>
-          <p class="forecast-text" id="forecastText">트윈이 이 문제를 분석 중입니다...</p>
-          <div class="forecast-gauge-wrap">
-            <div class="forecast-gauge-label">
-              <span>오답 확률</span>
-              <span id="gaugeVal">0%</span>
-            </div>
-            <div class="forecast-gauge-track">
-              <div class="forecast-gauge-fill" id="gaugeFill"></div>
-            </div>
-          </div>
-          <button class="btn-twin-analysis" id="twinAnalysisBtn" onclick="openModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            트윈 분석 보기
+          <button class="tab-btn" onclick="switchTab('simulator')">
+            AI 시뮬레이터
+          </button>
+          <button class="tab-btn" onclick="switchTab('report')">
+            분석 리포트
+          </button>
+          <button class="tab-btn" onclick="switchTab('settings')">
+            트윈 설정
           </button>
         </div>
-      </div>
-
-      <!-- RIGHT: Terminal -->
-      <div class="sim-right">
-        <div class="terminal-panel">
-          <div class="terminal-topbar">
-            <div class="terminal-dots">
-              <span class="t-dot t-red"></span>
-              <span class="t-dot t-yellow"></span>
-              <span class="t-dot t-green"></span>
-            </div>
-            <span class="terminal-title">TWIN CORE — 실시간 분석 로그</span>
-            <button class="terminal-clear" onclick="clearLog()">CLR</button>
-          </div>
-          <div class="terminal-body" id="terminalBody">
-            <div class="log-line log-system">[SYSTEM] TWIN EDU Core v2.4.1 초기화 완료</div>
-            <div class="log-line log-system">[SYSTEM] 학습자 프로파일 로드: 김노드 (ID: KN-2024-0387)</div>
-            <div class="log-line log-info">[INFO] 디지털 트윈 동기화율: 87.3%</div>
-            <div class="log-line log-info">[INFO] 오늘의 시뮬레이션 세션 시작...</div>
-            <div class="log-line log-warn">[WARN] 문제 세트 로드 완료 — 위험 문항 3개 감지됨</div>
-            <div class="log-line log-system">[TWIN] 실시간 풀이 모니터링 활성화 ▋</div>
-          </div>
-        </div>
-
-        <!-- Risk Meter -->
-        <div class="risk-meter-card">
-          <p class="risk-meter-title">현재 문항 위험도</p>
-          <div class="risk-meter-circle">
-            <svg viewBox="0 0 120 120" width="120" height="120">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="10"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#ef4444" stroke-width="10"
-                stroke-dasharray="314" stroke-dashoffset="314"
-                stroke-linecap="round" transform="rotate(-90 60 60)"
-                id="riskCircle" style="transition: stroke-dashoffset 1s ease;"/>
+        <div class="topbar-right">
+          <div class="topbar-date" id="currentDate"></div>
+          <div class="topbar-notify">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            <div class="risk-meter-val">
-              <span id="riskMeterVal">0</span>
-              <span class="risk-meter-unit">%</span>
+            <span class="notify-dot"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== TAB: DASHBOARD ===== -->
+      <section class="tab-content active" id="tab-dashboard">
+        <!-- Hero Section -->
+        <div class="hero-section">
+          <div class="hero-left">
+            <div class="hero-tag">
+              <span class="tag-pulse"></span>
+              오늘 밤 시뮬레이션 완료
+            </div>
+            <h1 class="hero-title">
+              김노드 님의 트윈이<br />
+              <span class="hero-accent">3개 오답 위험</span>을 예보했습니다
+            </h1>
+            <p class="hero-sub">
+              AI 분신이 오늘 영어 시뮬레이션을 완료했습니다.<br />지금 바로 위험
+              구간을 확인하고 선제 학습을 시작하세요.
+            </p>
+            <div class="hero-actions">
+              <button class="btn-primary" onclick="switchTab('simulator')">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="16"
+                  height="16"
+                >
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                시뮬레이터 시작
+              </button>
+              <button class="btn-secondary">리포트 보기</button>
             </div>
           </div>
-          <p class="risk-meter-label" id="riskMeterLabel">문제를 선택하세요</p>
-        </div>
+          <div class="hero-right">
+            <div
+              class="twin-orb-container"
+              style="position: relative; width: 300px; height: 300px"
+            >
+              <canvas
+                id="userRadarChart"
+                style="position: absolute; z-index: 1"
+              ></canvas>
 
-        <!-- Quick Nav -->
-        <div class="quick-nav-card">
-          <p class="quick-nav-title">문항 빠른 이동</p>
-          <div class="quick-nav-btns" id="quickNavBtns">
-            <!-- JS로 동적 생성 -->
+              <div
+                class="orb-inner"
+                style="
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  z-index: 2;
+                  background: rgba(255, 255, 255, 0.1);
+                  border: none;
+                "
+              >
+                <span class="orb-value" id="syncPercent">87</span>
+                <span class="orb-unit">%</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ===== TAB: REPORT ===== -->
-  <section class="tab-content" id="tab-report">
-    <div class="placeholder-section">
-      <div class="placeholder-icon">📊</div>
-      <h2>분석 리포트</h2>
-      <p>트윈이 수집한 학습 데이터를 기반으로 상세 분석 리포트를 준비 중입니다.<br/>시뮬레이터를 먼저 완료하면 리포트가 생성됩니다.</p>
-      <button class="btn-primary" onclick="switchTab('simulator')">시뮬레이터 시작하기</button>
-    </div>
-  </section>
-
-  <!-- ===== TAB: SETTINGS ===== -->
-  <section class="tab-content" id="tab-settings">
-    <div class="settings-container">
-      <div class="settings-header">
-        <h1 class="settings-title">AI 트윈 엔진 설정</h1>
-        <p class="settings-subtitle">트윈의 학습 분석 방식과 알림을 커스터마이징하세요</p>
-      </div>
-
-      <!-- 프로필 카드 -->
-      <div class="settings-section">
-        <div class="section-title">프로필 정보</div>
-        <div class="profile-card">
-          <div class="profile-card-avatar">
-            <span id="profileCardInitial">김</span>
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">정답 예측 건수</p>
+              <p class="stat-value" id="correctCount">12</p>
+              <p class="stat-change positive">+2 어제 대비</p>
+            </div>
           </div>
-          <div class="profile-card-info">
-            <p class="profile-card-name" id="profileCardName">김노드</p>
-            <p class="profile-card-detail" id="profileCardDetail">고등학교 2학년 · 서울</p>
-            <p class="profile-card-goal" id="profileCardGoal">목표: 서울대학교 공학계열</p>
+          <div class="stat-card stat-red">
+            <div class="stat-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">오답 위험 건수</p>
+              <p class="stat-value" id="riskCount">3</p>
+              <p class="stat-change negative">주의 필요</p>
+            </div>
           </div>
-          <button class="btn-edit-profile" onclick="openProfileModal()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            수정
+          <div class="stat-card stat-purple">
+            <div class="stat-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">오늘 학습 시간</p>
+              <p class="stat-value">
+                2<span style="font-size: 1rem; font-weight: 500">h 34m</span>
+              </p>
+              <p class="stat-change positive">목표 달성 중</p>
+            </div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </div>
+            <div class="stat-body">
+              <p class="stat-label">트윈 싱크율</p>
+              <p class="stat-value">
+                87<span style="font-size: 1rem; font-weight: 500">%</span>
+              </p>
+              <p class="stat-change positive">+5% 이번 주</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Twin Sync Bar -->
+        <div class="section-card">
+          <div class="card-header">
+            <h2 class="card-title">트윈 싱크 현황</h2>
+            <span class="card-badge">실시간</span>
+          </div>
+          <div class="sync-bars">
+            <div class="sync-bar-item">
+              <div class="sync-bar-label">
+                <span>영문법 (수 일치/시제)</span>
+                <span class="sync-bar-pct">92%</span>
+              </div>
+              <div class="sync-bar-track">
+                <div
+                  class="sync-bar-fill"
+                  data-width="92"
+                  style="background: #2563eb"
+                ></div>
+              </div>
+            </div>
+            <div class="sync-bar-item">
+              <div class="sync-bar-label">
+                <span>구문 독해 (관계사)</span>
+                <span class="sync-bar-pct">78%</span>
+              </div>
+              <div class="sync-bar-track">
+                <div
+                  class="sync-bar-fill"
+                  data-width="78"
+                  style="background: #7c3aed"
+                ></div>
+              </div>
+            </div>
+            <div class="sync-bar-item">
+              <div class="sync-bar-label">
+                <span>작문</span>
+                <span class="sync-bar-pct">85%</span>
+              </div>
+              <div class="sync-bar-track">
+                <div
+                  class="sync-bar-fill"
+                  data-width="85"
+                  style="background: #059669"
+                ></div>
+              </div>
+            </div>
+            <div class="sync-bar-item">
+              <div class="sync-bar-label">
+                <span>어휘 숙련도</span>
+                <span class="sync-bar-pct">61%</span>
+              </div>
+              <div class="sync-bar-track">
+                <div
+                  class="sync-bar-fill"
+                  data-width="61"
+                  style="background: #d97706"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Alerts -->
+        <div class="two-col-grid">
+          <div class="section-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                위험 알림 <span class="risk-blink">●</span>
+              </h2>
+              <span class="card-badge badge-red">3건</span>
+            </div>
+            <div class="risk-list" id="riskList">
+              <!-- JS로 동적 생성 -->
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="card-header">
+              <h2 class="card-title">AI 학습 패턴 분석</h2>
+            </div>
+            <div class="pattern-list">
+              <div class="pattern-item">
+                <div class="pattern-icon pattern-warn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="16"
+                    height="16"
+                  >
+                    <path
+                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                    />
+                  </svg>
+                </div>
+                <div class="pattern-body">
+                  <p class="pattern-title">풀이 시간 이상 감지</p>
+                  <p class="pattern-desc">
+                    Q.05 평균 풀이 시간 4분 초과 — 개념 재확인 필요
+                  </p>
+                </div>
+              </div>
+              <div class="pattern-item">
+                <div class="pattern-icon pattern-info">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="16"
+                    height="16"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
+                <div class="pattern-body">
+                  <p class="pattern-title">반복 오답 유형 감지</p>
+                  <p class="pattern-desc">
+                    수동태-능동태 전환 문제에서 최근 3회 연속 오답 발생
+                  </p>
+                </div>
+              </div>
+              <div class="pattern-item">
+                <div class="pattern-icon pattern-ok">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="16"
+                    height="16"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <div class="pattern-body">
+                  <p class="pattern-title">강점 유형 확인</p>
+                  <p class="pattern-desc">여휘 문제에서 높은 정답률</p>
+                </div>
+              </div>
+              <div class="pattern-item">
+                <div class="pattern-icon pattern-warn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="16"
+                    height="16"
+                  >
+                    <path
+                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                    />
+                  </svg>
+                </div>
+                <div class="pattern-body">
+                  <p class="pattern-title">야간 집중도 저하</p>
+                  <p class="pattern-desc">
+                    오후 10시 이후 오답률 23% 상승 — 학습 시간대 조정 권장
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB: SIMULATOR ===== -->
+      <section class="tab-content" id="tab-simulator">
+        <div class="sim-layout">
+          <!-- LEFT: Quiz Area -->
+          <div class="sim-left">
+            <div class="sim-header">
+              <div class="sim-title-row">
+                <div>
+                  <h2 class="sim-title">AI 시뮬레이터</h2>
+                  <p class="sim-subtitle">
+                    트윈이 실시간으로 당신의 풀이를 분석합니다
+                  </p>
+                </div>
+                <div class="sim-nav-btns">
+                  <button
+                    class="sim-nav-btn"
+                    id="prevBtn"
+                    onclick="prevQuestion()"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                  <span class="sim-nav-counter" id="qCounter">1 / 5</span>
+                  <button
+                    class="sim-nav-btn"
+                    id="nextBtn"
+                    onclick="nextQuestion()"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step Indicator -->
+              <div class="step-indicator" id="stepIndicator">
+                <!-- JS로 동적 생성 -->
+              </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card">
+              <div class="q-meta-row">
+                <span class="q-num" id="qNum">Q.01</span>
+                <span class="q-type" id="qType">미적분 · 치환적분</span>
+                <span class="q-risk-badge" id="qRiskBadge"
+                  >위험도 <strong id="qRiskVal">72</strong>%</span
+                >
+              </div>
+              <div class="q-title" id="qTitle">문제를 불러오는 중...</div>
+              <div class="q-formula-box" id="qFormula"></div>
+              <div class="q-options" id="qOptions">
+                <!-- JS로 동적 생성 -->
+              </div>
+              <div class="q-result-msg" id="qResultMsg"></div>
+            </div>
+
+            <!-- AI Forecast -->
+            <div class="forecast-card">
+              <div class="forecast-header">
+                <span class="forecast-icon">⚡</span>
+                <span class="forecast-title">AI 오답 예보</span>
+              </div>
+              <p class="forecast-text" id="forecastText">
+                트윈이 이 문제를 분석 중입니다...
+              </p>
+              <div class="forecast-gauge-wrap">
+                <div class="forecast-gauge-label">
+                  <span>오답 확률</span>
+                  <span id="gaugeVal">0%</span>
+                </div>
+                <div class="forecast-gauge-track">
+                  <div class="forecast-gauge-fill" id="gaugeFill"></div>
+                </div>
+              </div>
+              <button
+                class="btn-twin-analysis"
+                id="twinAnalysisBtn"
+                onclick="openModal()"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                트윈 분석 보기
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT: Terminal -->
+          <div class="sim-right">
+            <div class="terminal-panel">
+              <div class="terminal-topbar">
+                <div class="terminal-dots">
+                  <span class="t-dot t-red"></span>
+                  <span class="t-dot t-yellow"></span>
+                  <span class="t-dot t-green"></span>
+                </div>
+                <span class="terminal-title">TWIN CORE — 실시간 분석 로그</span>
+                <button class="terminal-clear" onclick="clearLog()">CLR</button>
+              </div>
+              <div class="terminal-body" id="terminalBody">
+                <div class="log-line log-system">
+                  [SYSTEM] TWIN EDU Core v2.4.1 초기화 완료
+                </div>
+                <div class="log-line log-system">
+                  [SYSTEM] 학습자 프로파일 로드: 김노드 (ID: KN-2024-0387)
+                </div>
+                <div class="log-line log-info">
+                  [INFO] 디지털 트윈 동기화율: 87.3%
+                </div>
+                <div class="log-line log-info">
+                  [INFO] 오늘의 시뮬레이션 세션 시작...
+                </div>
+                <div class="log-line log-warn">
+                  [WARN] 문제 세트 로드 완료 — 위험 문항 3개 감지됨
+                </div>
+                <div class="log-line log-system">
+                  [TWIN] 실시간 풀이 모니터링 활성화 ▋
+                </div>
+              </div>
+            </div>
+
+            <!-- Risk Meter -->
+            <div class="risk-meter-card">
+              <p class="risk-meter-title">현재 문항 위험도</p>
+              <div class="risk-meter-circle">
+                <svg viewBox="0 0 120 120" width="120" height="120">
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke="#1e293b"
+                    stroke-width="10"
+                  />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    fill="none"
+                    stroke="#ef4444"
+                    stroke-width="10"
+                    stroke-dasharray="314"
+                    stroke-dashoffset="314"
+                    stroke-linecap="round"
+                    transform="rotate(-90 60 60)"
+                    id="riskCircle"
+                    style="transition: stroke-dashoffset 1s ease"
+                  />
+                </svg>
+                <div class="risk-meter-val">
+                  <span id="riskMeterVal">0</span>
+                  <span class="risk-meter-unit">%</span>
+                </div>
+              </div>
+              <p class="risk-meter-label" id="riskMeterLabel">
+                문제를 선택하세요
+              </p>
+            </div>
+
+            <!-- Quick Nav -->
+            <div class="quick-nav-card">
+              <p class="quick-nav-title">문항 빠른 이동</p>
+              <div class="quick-nav-btns" id="quickNavBtns">
+                <!-- JS로 동적 생성 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB: REPORT ===== -->
+      <section class="tab-content" id="tab-report">
+        <div class="placeholder-section">
+          <div class="placeholder-icon">📊</div>
+          <h2>분석 리포트</h2>
+          <p>
+            트윈이 수집한 학습 데이터를 기반으로 상세 분석 리포트를 준비
+            중입니다.<br />시뮬레이터를 먼저 완료하면 리포트가 생성됩니다.
+          </p>
+          <button class="btn-primary" onclick="switchTab('simulator')">
+            시뮬레이터 시작하기
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== TAB: SETTINGS ===== -->
+      <section class="tab-content" id="tab-settings">
+        <div class="settings-container">
+          <div class="settings-header">
+            <h1 class="settings-title">AI 트윈 엔진 설정</h1>
+            <p class="settings-subtitle">
+              트윈의 학습 분석 방식과 알림을 커스터마이징하세요
+            </p>
+          </div>
+
+          <!-- 프로필 카드 -->
+          <div class="settings-section">
+            <div class="section-title">프로필 정보</div>
+            <div class="profile-card">
+              <div class="profile-card-avatar">
+                <span id="profileCardInitial">김</span>
+              </div>
+              <div class="profile-card-info">
+                <p class="profile-card-name" id="profileCardName">김노드</p>
+                <p class="profile-card-detail" id="profileCardDetail">
+                  고등학교 2학년 · 서울
+                </p>
+                <p class="profile-card-goal" id="profileCardGoal">
+                  목표: 서울대학교 공학계열
+                </p>
+              </div>
+              <button class="btn-edit-profile" onclick="openProfileModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="16"
+                  height="16"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  />
+                  <path
+                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  />
+                </svg>
+                수정
+              </button>
+            </div>
+          </div>
+
+          <!-- 분석 정확도 설정 -->
+          <div class="settings-section">
+            <div class="section-title">분석 정확도 설정</div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="label-title">분석 모드</span>
+                <span class="label-desc"
+                  >정교한 분석 vs 빠른 시뮬레이션 중 선택</span
+                >
+              </div>
+              <div class="slider-container">
+                <span class="slider-label">빠른 분석</span>
+                <input
+                  type="range"
+                  id="precisionSlider"
+                  min="0"
+                  max="100"
+                  value="70"
+                  class="slider"
+                  oninput="updatePrecision(this.value)"
+                />
+                <span class="slider-label">정교한 분석</span>
+              </div>
+              <p class="setting-value" id="precisionValue">정교한 분석 (70%)</p>
+            </div>
+          </div>
+
+          <!-- 데이터 소스 설정 -->
+          <div class="settings-section">
+            <div class="section-title">데이터 소스</div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="label-title">학습 데이터 기반</span>
+                <span class="label-desc"
+                  >트윈 분석에 사용할 데이터 범위를 선택하세요</span
+                >
+              </div>
+              <div class="toggle-group">
+                <button
+                  class="toggle-btn active"
+                  id="toggleWeek"
+                  onclick="toggleDataSource('week')"
+                >
+                  <span class="toggle-dot"></span>
+                  최근 1주일
+                </button>
+                <button
+                  class="toggle-btn"
+                  id="toggleAll"
+                  onclick="toggleDataSource('all')"
+                >
+                  <span class="toggle-dot"></span>
+                  전체 누적 데이터
+                </button>
+              </div>
+              <p class="setting-info">
+                현재:
+                <strong id="dataSourceLabel">최근 1주일 데이터 기반</strong> (더
+                빠른 반응, 최신 트렌드 반영)
+              </p>
+            </div>
+          </div>
+
+          <!-- 알림 설정 -->
+          <div class="settings-section">
+            <div class="section-title">위험 예보 알림</div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="label-title">알림 방식 선택</span>
+                <span class="label-desc"
+                  >위험 문항 감지 시 어떻게 알려드릴까요?</span
+                >
+              </div>
+              <div class="alert-capsules">
+                <button
+                  class="capsule-btn active"
+                  id="alertDashboard"
+                  onclick="toggleAlert('dashboard')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="14"
+                    height="14"
+                  >
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                  대시보드 배너
+                </button>
+                <button
+                  class="capsule-btn"
+                  id="alertTerminal"
+                  onclick="toggleAlert('terminal')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="14"
+                    height="14"
+                  >
+                    <polyline points="4 17 10 11 4 5" />
+                    <line x1="12" y1="19" x2="20" y2="19" />
+                  </svg>
+                  터미널 로그
+                </button>
+                <button
+                  class="capsule-btn"
+                  id="alertSound"
+                  onclick="toggleAlert('sound')"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="14"
+                    height="14"
+                  >
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                  소리 알림
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 싱크 민감도 -->
+          <div class="settings-section">
+            <div class="section-title">트윈 싱크 민감도</div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="label-title">싱크 업데이트 빈도</span>
+                <span class="label-desc"
+                  >트윈이 얼마나 자주 학습 패턴을 업데이트할지 선택</span
+                >
+              </div>
+              <div class="slider-container">
+                <span class="slider-label">낮음</span>
+                <input
+                  type="range"
+                  id="syncSlider"
+                  min="0"
+                  max="100"
+                  value="60"
+                  class="slider"
+                  oninput="updateSyncSensitivity(this.value)"
+                />
+                <span class="slider-label">높음</span>
+              </div>
+              <p class="setting-value" id="syncValue">중간 민감도 (60%)</p>
+            </div>
+          </div>
+
+          <!-- 데이터 관리 -->
+          <div class="settings-section">
+            <div class="section-title">데이터 관리</div>
+            <div class="setting-item">
+              <div class="setting-label">
+                <span class="label-title">트윈 초기화</span>
+                <span class="label-desc"
+                  >모든 학습 데이터를 삭제하고 새로운 트윈을 만듭니다</span
+                >
+              </div>
+              <button class="btn-danger" onclick="confirmResetTwin()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2-8.83" />
+                </svg>
+                트윈 다시 만들기
+              </button>
+            </div>
+          </div>
+
+          <!-- 설정 저장 상태 -->
+          <div class="settings-footer">
+            <div class="save-status" id="saveStatus">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="16"
+                height="16"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              모든 설정이 자동으로 저장되었습니다
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ========== PROFILE MODAL ========== -->
+    <div
+      class="modal-overlay"
+      id="profileModalOverlay"
+      onclick="closeProfileModal(event)"
+    >
+      <div class="modal-box profile-modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-tag">프로필 관리</span>
+            <h3 class="modal-title">내 정보 수정</h3>
+          </div>
+          <button class="modal-close" onclick="closeProfileModal()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="profile-edit-section">
+            <p class="profile-edit-note">
+              💡 이 정보는 트윈 시뮬레이션의 정확도를 높이는 기초 데이터로
+              활용됩니다.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">이름</label>
+              <input
+                type="text"
+                id="inputName"
+                class="form-input"
+                placeholder="이름을 입력하세요"
+                value="김노드"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">학교</label>
+              <input
+                type="text"
+                id="inputSchool"
+                class="form-input"
+                placeholder="학교명"
+                value="서울고등학교"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1">
+                <label class="form-label">학년</label>
+                <select id="selectGrade" class="form-input">
+                  <option value="1">1학년</option>
+                  <option value="2" selected>2학년</option>
+                  <option value="3">3학년</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1">
+                <label class="form-label">지역</label>
+                <input
+                  type="text"
+                  id="inputRegion"
+                  class="form-input"
+                  placeholder="지역"
+                  value="서울"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">이메일</label>
+              <input
+                type="email"
+                id="inputEmail"
+                class="form-input"
+                placeholder="이메일"
+                value="kimnode@school.kr"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">목표 대학</label>
+              <input
+                type="text"
+                id="inputUniversity"
+                class="form-input"
+                placeholder="목표 대학"
+                value="서울대학교"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">목표 학과</label>
+              <input
+                type="text"
+                id="inputMajor"
+                class="form-input"
+                placeholder="목표 학과"
+                value="공학계열"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeProfileModal()">
+            취소
+          </button>
+          <button class="btn-primary" onclick="saveProfile()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <path
+                d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+              />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            저장
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- 분석 정확도 설정 -->
-      <div class="settings-section">
-        <div class="section-title">분석 정확도 설정</div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="label-title">분석 모드</span>
-            <span class="label-desc">정교한 분석 vs 빠른 시뮬레이션 중 선택</span>
+    <!-- ========== MODAL ========== -->
+    <div
+      class="modal-overlay"
+      id="analysisModalOverlay"
+      onclick="closeAnalysisModal(event)"
+    >
+      <div class="modal-box">
+        <div class="modal-header">
+          <div>
+            <span class="modal-tag">트윈 심층 분석</span>
+            <h3 class="modal-title" id="modalTitle">오답 원인 분석</h3>
           </div>
-          <div class="slider-container">
-            <span class="slider-label">빠른 분석</span>
-            <input type="range" id="precisionSlider" min="0" max="100" value="70" class="slider" oninput="updatePrecision(this.value)">
-            <span class="slider-label">정교한 분석</span>
-          </div>
-          <p class="setting-value" id="precisionValue">정교한 분석 (70%)</p>
+          <button class="modal-close" onclick="closeAnalysisModal()">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
-      </div>
-
-      <!-- 데이터 소스 설정 -->
-      <div class="settings-section">
-        <div class="section-title">데이터 소스</div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="label-title">학습 데이터 기반</span>
-            <span class="label-desc">트윈 분석에 사용할 데이터 범위를 선택하세요</span>
+        <div class="modal-body">
+          <div class="modal-risk-row">
+            <div class="modal-risk-badge" id="modalRiskBadge">
+              오답 확률 85%
+            </div>
+            <div class="modal-risk-bar-wrap">
+              <div class="modal-risk-bar" id="modalRiskBar"></div>
+            </div>
           </div>
-          <div class="toggle-group">
-            <button class="toggle-btn active" id="toggleWeek" onclick="toggleDataSource('week')">
-              <span class="toggle-dot"></span>
-              최근 1주일
-            </button>
-            <button class="toggle-btn" id="toggleAll" onclick="toggleDataSource('all')">
-              <span class="toggle-dot"></span>
-              전체 누적 데이터
-            </button>
-          </div>
-          <p class="setting-info">현재: <strong id="dataSourceLabel">최근 1주일 데이터 기반</strong> (더 빠른 반응, 최신 트렌드 반영)</p>
-        </div>
-      </div>
-
-      <!-- 알림 설정 -->
-      <div class="settings-section">
-        <div class="section-title">위험 예보 알림</div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="label-title">알림 방식 선택</span>
-            <span class="label-desc">위험 문항 감지 시 어떻게 알려드릴까요?</span>
-          </div>
-          <div class="alert-capsules">
-            <button class="capsule-btn active" id="alertDashboard" onclick="toggleAlert('dashboard')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-              대시보드 배너
-            </button>
-            <button class="capsule-btn" id="alertTerminal" onclick="toggleAlert('terminal')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-              터미널 로그
-            </button>
-            <button class="capsule-btn" id="alertSound" onclick="toggleAlert('sound')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-              소리 알림
-            </button>
+          <div class="modal-reason" id="modalReason"></div>
+          <div class="modal-solution">
+            <h4>트윈 권장 학습법</h4>
+            <ul id="modalSolutions">
+              <li>치환 변수 설정 단계를 별도로 정리하여 반복 연습</li>
+              <li>유사 유형 문제 3문항 추가 풀이 권장</li>
+              <li>개념 노트: 치환적분 공식 재확인</li>
+            </ul>
           </div>
         </div>
-      </div>
-
-      <!-- 싱크 민감도 -->
-      <div class="settings-section">
-        <div class="section-title">트윈 싱크 민감도</div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="label-title">싱크 업데이트 빈도</span>
-            <span class="label-desc">트윈이 얼마나 자주 학습 패턴을 업데이트할지 선택</span>
-          </div>
-          <div class="slider-container">
-            <span class="slider-label">낮음</span>
-            <input type="range" id="syncSlider" min="0" max="100" value="60" class="slider" oninput="updateSyncSensitivity(this.value)">
-            <span class="slider-label">높음</span>
-          </div>
-          <p class="setting-value" id="syncValue">중간 민감도 (60%)</p>
-        </div>
-      </div>
-
-      <!-- 데이터 관리 -->
-      <div class="settings-section">
-        <div class="section-title">데이터 관리</div>
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="label-title">트윈 초기화</span>
-            <span class="label-desc">모든 학습 데이터를 삭제하고 새로운 트윈을 만듭니다</span>
-          </div>
-          <button class="btn-danger" onclick="confirmResetTwin()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
-            트윈 다시 만들기
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeAnalysisModal()">
+            닫기
+          </button>
+          <button
+            class="btn-primary"
+            onclick="
+              switchTab('simulator');
+              closeAnalysisModal();
+            "
+          >
+            시뮬레이터에서 풀기
           </button>
         </div>
       </div>
-
-      <!-- 설정 저장 상태 -->
-      <div class="settings-footer">
-        <div class="save-status" id="saveStatus">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-          모든 설정이 자동으로 저장되었습니다
-        </div>
-      </div>
     </div>
-  </section>
-
-</main>
-
-<!-- ========== PROFILE MODAL ========== -->
-<div class="modal-overlay" id="profileModalOverlay" onclick="closeProfileModal(event)">
-  <div class="modal-box profile-modal">
-    <div class="modal-header">
-      <div>
-        <span class="modal-tag">프로필 관리</span>
-        <h3 class="modal-title">내 정보 수정</h3>
-      </div>
-      <button class="modal-close" onclick="closeProfileModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="profile-edit-section">
-        <p class="profile-edit-note">💡 이 정보는 트윈 시뮬레이션의 정확도를 높이는 기초 데이터로 활용됩니다.</p>
-        
-        <div class="form-group">
-          <label class="form-label">이름</label>
-          <input type="text" id="inputName" class="form-input" placeholder="이름을 입력하세요" value="김노드">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">학교</label>
-          <input type="text" id="inputSchool" class="form-input" placeholder="학교명" value="서울고등학교">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">학년</label>
-            <select id="selectGrade" class="form-input">
-              <option value="1">1학년</option>
-              <option value="2" selected>2학년</option>
-              <option value="3">3학년</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">지역</label>
-            <input type="text" id="inputRegion" class="form-input" placeholder="지역" value="서울">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">이메일</label>
-          <input type="email" id="inputEmail" class="form-input" placeholder="이메일" value="kimnode@school.kr">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">목표 대학</label>
-          <input type="text" id="inputUniversity" class="form-input" placeholder="목표 대학" value="서울대학교">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">목표 학과</label>
-          <input type="text" id="inputMajor" class="form-input" placeholder="목표 학과" value="공학계열">
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeProfileModal()">취소</button>
-      <button class="btn-primary" onclick="saveProfile()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        저장
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ========== MODAL ========== -->
-  <div class="modal-overlay" id="analysisModalOverlay" onclick="closeAnalysisModal(event)">
-    <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <span class="modal-tag">트윈 심층 분석</span>
-        <h3 class="modal-title" id="modalTitle">오답 원인 분석</h3>
-      </div>
-      <button class="modal-close" onclick="closeAnalysisModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-risk-row">
-        <div class="modal-risk-badge" id="modalRiskBadge">오답 확률 85%</div>
-        <div class="modal-risk-bar-wrap">
-          <div class="modal-risk-bar" id="modalRiskBar"></div>
-        </div>
-      </div>
-      <div class="modal-reason" id="modalReason"></div>
-      <div class="modal-solution">
-        <h4>트윈 권장 학습법</h4>
-        <ul id="modalSolutions">
-          <li>치환 변수 설정 단계를 별도로 정리하여 반복 연습</li>
-          <li>유사 유형 문제 3문항 추가 풀이 권장</li>
-          <li>개념 노트: 치환적분 공식 재확인</li>
-        </ul>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeAnalysisModal()">닫기</button>
-      <button class="btn-primary" onclick="switchTab('simulator'); closeAnalysisModal();">시뮬레이터에서 풀기</button>
-    </div>
-  </div>
-</div>
-<script src="config.js"></script>
-<script src="app.js"></script>
-</body>
+    <!-- <script src="config.js"></script> -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
