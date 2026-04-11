@@ -137,40 +137,51 @@ const QUESTIONS = [
 ────────────────────────────────────────── */
 
 async function updateAIVisualization(userId = "115") {
-  const { data: stats } = await supabase
-    .from("user_ai_stats")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+  try {
+    // [Step 1] 백엔드 API로부터 유저 통계 및 한글 취약점 매핑 데이터 가져오기
+    const response = await fetch(`${API_BASE_URL}/api/user-stats/${userId}`);
+    const stats = await response.json();
 
-  const configSourceLabel = document.getElementById("dataSourceLabel");
-  if (configSourceLabel) {
-    configSourceLabel.innerHTML = `
-        <strong>현재 로드된 요소:</strong><br>
-        ID: ${stats.user_id} | 점수: ${stats.predicted_score}<br>
-        문법: ${stats.grammar_score} | 독해: ${stats.reading_score} | 구조: ${stats.structure_score}
-      `;
-  }
-  document.getElementById("profileName").textContent = `유저 ${userId}`;
-  document.getElementById("profileCardName").textContent = `유저 ${userId}`;
-  if (stats.user_name) {
-    document.getElementById("profileName").textContent = stats.user_name;
-    document.getElementById("profileInitial").textContent =
-      stats.user_name.charAt(0);
-  }
-  console.log(data);
-  if (stats) {
-    // 1. 숫자 업데이트
+    if (stats.error) {
+      appendLog(`[ERROR] 유저 ${userId} 데이터가 없습니다.`, "error");
+      alert("유저 데이터를 찾을 수 없다능!");
+      return;
+    }
+    console.log("!!!!!", stats);
+    // [Step 2] 프로필 및 대시보드 텍스트 업데이트
+    const userName = stats.user_name || `유저 ${userId}`;
+    document.getElementById("profileName").textContent = userName;
+    document.getElementById("profileInitial").textContent = userName.charAt(0);
+
+    // 점수 및 싱크율 업데이트
     const score = Math.round(stats.predicted_score * 100);
     document.getElementById("syncPercent").textContent = score;
 
-    // 2. 오각형 업데이트 (Chart.js)
-    renderRadarChart(stats); // 아까 짠 차트 함수 호출
+    // [Step 3] 취약 영역(위험 알림) 리스트 갱신 (한글 이름 적용)
+    const riskList = document.getElementById("riskList");
+    if (riskList && stats.weak_tag_names) {
+      riskList.innerHTML = stats.weak_tag_names
+        .map(
+          (name) => `
+        <div class="risk-item">
+            <span class="risk-item-body">${name}</span>
+            <span class="risk-item-pct">위험</span>
+        </div>
+      `,
+        )
+        .join("");
+    }
+
+    // [Step 4] 오각형 지식 차트 갱신
+    renderRadarChart(stats);
 
     appendLog(
-      `[TWIN] 유저 ${userId} 시각화 동기화 완료 (점수: ${score}%)`,
-      "twin",
+      `[SYSTEM] 유저 ${userId} AI 트윈 동기화 완료 (점수: ${score}%)`,
+      "ok",
     );
+  } catch (err) {
+    console.error("데이터 로드 실패:", err);
+    appendLog(`[ERROR] 네트워크 연결 실패`, "error");
   }
 }
 
@@ -245,18 +256,38 @@ function switchTab(tabName) {
    4. 문제 초기화 (initQuiz)
 ────────────────────────────────────────── */
 // 유저 입력 버튼 클릭 시 실행되는 함수라능
-async function loadTargetUser() {
-  const userId = document.getElementById("userInputId").value.trim() || "115";
+/* main.js 내부 로직 통합 */
+
+window.loadTargetUser = async () => {
+  const inputVal = document.getElementById("userInputId").value.trim();
+  const userId = inputVal || "115"; // 입력 없으면 기본 115번
+
   appendLog(`[SYSTEM] 유저 ${userId} 데이터 동기화 시도...`, "info");
   await updateAIVisualization(userId);
+};
+
+// [Step 2] 추천 문제 불러와서 시뮬레이터 세팅
+async function startAISimulator(userId) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/recommend-problems/${userId}`,
+  );
+  const problems = await response.json();
+
+  if (problems && problems.length > 0) {
+    // 서버에서 가져온 문제로 글로벌 QUESTIONS 배열 업데이트
+    // (기존 QUESTIONS 구조에 맞게 매핑 필요)
+    setupSimulator(problems);
+    switchTab("simulator");
+  }
 }
 
-// 오각형 차트를 그리는 함수라능 (Chart.js 라이브러리 필요)
+// 오각형 차트 그리기 (중복 제거된 단일 함수)
 function renderRadarChart(stats) {
   const canvas = document.getElementById("userRadarChart");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  if (myRadarChart) myRadarChart.destroy(); // 기존 차트가 있으면 지우고 새로 그려야 안 겹친다능
+
+  if (myRadarChart) myRadarChart.destroy();
 
   myRadarChart = new Chart(ctx, {
     type: "radar",
@@ -264,6 +295,7 @@ function renderRadarChart(stats) {
       labels: ["문법", "구조", "독해", "어휘", "논리"],
       datasets: [
         {
+          label: "지식 숙련도",
           data: [
             (stats.grammar_score || 0) * 100,
             (stats.structure_score || 0) * 100,
@@ -271,18 +303,56 @@ function renderRadarChart(stats) {
             (stats.vocabulary_score || 0) * 100,
             (stats.logic_score || 0) * 100,
           ],
-          backgroundColor: "rgba(37, 99, 235, 0.2)",
-          borderColor: "#2563eb",
-          pointBackgroundColor: "#2563eb",
-          borderWidth: 2,
+          // 채우기 색상: 로얄 블루에 투명도 부여
+          backgroundColor: "rgba(37, 99, 235, 0.4)",
+          // 테두리 선: 밝은 파란색
+          borderColor: "#60a5fa",
+          // 데이터 포인트: 흰색 테두리로 강조
+          pointBackgroundColor: "#ffffff",
+          pointBorderColor: "#2563eb",
+          pointHoverBackgroundColor: "#2563eb",
+          pointHoverBorderColor: "#ffffff",
+          borderWidth: 3,
         },
       ],
     },
     options: {
       scales: {
-        r: { min: 0, max: 100, beginAtZero: true, ticks: { display: false } },
+        r: {
+          min: 0,
+          max: 100,
+          beginAtZero: true,
+          // 1. 거미줄 그리드 색상 (연한 흰색)
+          grid: {
+            color: "rgba(255, 255, 255, 0.2)",
+          },
+          // 2. 각도별 라인 색상
+          angleLines: {
+            color: "rgba(255, 255, 255, 0.2)",
+          },
+          // 3. 외부 라벨 (문법, 구조 등) 글자색을 흰색으로!
+          pointLabels: {
+            color: "#ffffff",
+            font: {
+              size: 13,
+              weight: "600",
+              family: "Noto Sans KR",
+            },
+          },
+          // 4. 내부 숫자 표시 안 함 (깔끔하게)
+          ticks: {
+            display: false,
+          },
+        },
       },
-      plugins: { legend: { display: false } },
+      plugins: {
+        // 범례 숨김
+        legend: {
+          display: false,
+        },
+      },
+      // 반응형 설정
+      maintainAspectRatio: false,
     },
   });
 }
@@ -881,73 +951,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "%c 프로필 관리 및 AI 엔진 설정 모듈 로드됨",
     "color:#7c3aed;font-size:12px;",
   );
-  /* ──────────────────────────────────────────
-   20. AI 오각형 차트 연동 로직
-────────────────────────────────────────── */
-  async function fetchRadarData(userId = "115") {
-    try {
-      // 1. Supabase에서 영역별 점수 땡겨오기
-      const { data: stats, error } = await supabase
-        .from("user_ai_stats")
-        .select(
-          "grammar_score, reading_score, vocabulary_score, structure_score, logic_score",
-        )
-        .eq("user_id", userId)
-        .single();
-
-      if (error) throw error;
-      updateAIVisualization();
-
-      // 2. 오각형 차트 그리기
-      const ctx = document.getElementById("userRadarChart").getContext("2d");
-
-      // 기존 차트가 있으면 삭제하고 새로 생성 (중복 방지)
-      if (window.myRadar) window.myRadar.destroy();
-
-      window.myRadar = new Chart(ctx, {
-        type: "radar",
-        data: {
-          labels: ["문법", "구조", "독해", "어휘", "논리"],
-          datasets: [
-            {
-              label: "지식 숙련도 (%)",
-              data: [
-                stats.grammar_score * 100,
-                stats.structure_score * 100,
-                stats.reading_score * 100,
-                stats.vocabulary_score * 100,
-                stats.logic_score * 100,
-              ],
-              backgroundColor: "rgba(37, 99, 235, 0.2)", // Royal Blue 투명도
-              borderColor: "#2563eb",
-              pointBackgroundColor: "#2563eb",
-              borderWidth: 2,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            r: {
-              min: 0,
-              max: 100,
-              beginAtZero: true,
-              ticks: { display: false }, // 숫자 숨김 (디자인용)
-              grid: { color: "rgba(0, 0, 0, 0.05)" },
-            },
-          },
-          plugins: { legend: { display: false } },
-        },
-      });
-
-      appendLog(`[TWIN] 유저 ${userId}의 오각형 분석 데이터 로드 완료`, "twin");
-    } catch (err) {
-      console.error("차트 로드 실패:", err);
-    }
-  }
-
-  // 3. 페이지가 뜨자마자 차트를 그리도록 초기화 함수에 추가
-  // app.js의 최하단 DOMContentLoaded 이벤트 안에서 fetchRadarData('115')를 호출하라능!
-  fetchRadarData("115");
 });
 window.switchTab = switchTab;
 window.loadTargetUser = loadTargetUser;
