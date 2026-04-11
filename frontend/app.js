@@ -119,6 +119,25 @@ const QUESTIONS = [
 // config.js가 없을 경우를 대비한 안전장치
 const API_BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : "https://node-t696.onrender.com";
 
+async function updateAIVisualization(userId = '115') {
+  const { data: stats } = await supabase
+    .from('user_ai_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (stats) {
+    // 1. 숫자 업데이트
+    const score = Math.round(stats.predicted_score * 100);
+    document.getElementById('syncPercent').textContent = score;
+
+    // 2. 오각형 업데이트 (Chart.js)
+    renderRadarChart(stats); // 아까 짠 차트 함수 호출
+    
+    appendLog(`[TWIN] 유저 ${userId} 시각화 동기화 완료 (점수: ${score}%)`, 'twin');
+  }
+}
+
 async function fetchQuestionsFromServer() {
   if (!API_BASE_URL) return; // 주소 없으면 기존 로컬 데이터 사용
   
@@ -141,6 +160,7 @@ async function fetchQuestionsFromServer() {
    2. 전역 상태
 ────────────────────────────────────────── */
 let currentQ = 0;
+let myRadarChart = null; // 오각형 차트를 파괴하고 새로 그리기 위해 필요하다능
 let answered = new Array(QUESTIONS.length).fill(null);
 let logQueue = [];
 let isTyping = false;
@@ -182,6 +202,76 @@ function switchTab(tabName) {
 /* ──────────────────────────────────────────
    4. 문제 초기화 (initQuiz)
 ────────────────────────────────────────── */
+// 유저 입력 버튼 클릭 시 실행되는 함수라능
+async function loadTargetUser() {
+    const userId = document.getElementById('userInputId').value.trim() || '115';
+    appendLog(`[SYSTEM] 유저 ${userId} 데이터 동기화 시도...`, 'info');
+    await updateAIVisualization(userId);
+}
+
+// 오각형 차트를 그리는 함수라능 (Chart.js 라이브러리 필요)
+function renderRadarChart(stats) {
+    const canvas = document.getElementById('userRadarChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (myRadarChart) myRadarChart.destroy(); // 기존 차트가 있으면 지우고 새로 그려야 안 겹친다능
+
+    myRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['문법', '구조', '독해', '어휘', '논리'],
+            datasets: [{
+                data: [
+                    (stats.grammar_score || 0) * 100,
+                    (stats.structure_score || 0) * 100,
+                    (stats.reading_score || 0) * 100,
+                    (stats.vocabulary_score || 0) * 100,
+                    (stats.logic_score || 0) * 100
+                ],
+                backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                borderColor: '#2563eb',
+                pointBackgroundColor: '#2563eb',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: { r: { min: 0, max: 100, beginAtZero: true, ticks: { display: false } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+// 데이터를 땡겨오고 화면을 업데이트하는 메인 로직이라능
+async function updateAIVisualization(userId) {
+    try {
+        // 1. 유저 통계 가져오기
+        const { data: stats, error } = await supabase.from('user_ai_stats').select('*').eq('user_id', userId).single();
+        if (error) throw error;
+
+        // 2. 화면 숫자 및 차트 업데이트
+        const score = Math.round(stats.predicted_score * 100);
+        document.getElementById('syncPercent').textContent = score;
+        document.getElementById('profileName').textContent = `유저 ${userId}`;
+        renderRadarChart(stats);
+
+        // 3. [추가] 해당 유저의 취약 태그에 맞는 문제를 서버에서 가져오기
+        const response = await fetch(`${API_BASE_URL}/api/questions`);
+        const allData = await response.json();
+        
+        // 태그가 일치하는 문제만 필터링 (없으면 기존 하드코딩 유지)
+        const recommended = allData.filter(q => q.category === stats.weak_category);
+        if (recommended.length > 0) {
+            // 하드코딩을 덮어씌우는 게 아니라, 현재 세션의 QUESTIONS만 교체한다능!
+            // QUESTIONS = recommended.slice(0, 5); 
+            // initQuiz(0);
+            appendLog(`[TWIN] 취약 태그(${stats.weak_category}) 기반 문제 추천 완료`, 'twin');
+        }
+
+        appendLog(`[TWIN] 유저 ${userId} 분석 동기화 성공 (${score}%)`, 'twin');
+    } catch (err) {
+        appendLog(`[ERROR] 데이터를 불러오지 못했습니다. 하드코딩 모드 유지.`, 'error');
+    }
+}
 function initQuiz(idx) {
   const q = QUESTIONS[idx];
   currentQ = idx;
@@ -705,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildRiskList();
   animateSyncBars();
   startAmbientLogs();
-
+updateAIVisualization('115');
   setTimeout(() => {
     const correctEl = document.getElementById('correctCount');
     const riskEl = document.getElementById('riskCount');
@@ -730,4 +820,84 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('%c TWIN EDU Core v2.5 ', 'background:#2563eb;color:white;font-size:14px;padding:4px 8px;border-radius:4px;');
   console.log('%c 디지털 트윈 학습 플랫폼 초기화 완료', 'color:#2563eb;font-size:12px;');
   console.log('%c 프로필 관리 및 AI 엔진 설정 모듈 로드됨', 'color:#7c3aed;font-size:12px;');
+/* ──────────────────────────────────────────
+   20. AI 오각형 차트 연동 로직
+────────────────────────────────────────── */
+async function fetchRadarData(userId = '115') {
+  try {
+    // 1. Supabase에서 영역별 점수 땡겨오기
+    const { data: stats, error } = await supabase
+      .from('user_ai_stats')
+      .select('grammar_score, reading_score, vocabulary_score, structure_score, logic_score')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) throw error;
+async function updateAIVisualization(userId = '115') {
+  const { data: stats } = await supabase
+    .from('user_ai_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (stats) {
+    // 1. 숫자 업데이트
+    const score = Math.round(stats.predicted_score * 100);
+    document.getElementById('syncPercent').textContent = score;
+
+    // 2. 오각형 업데이트 (Chart.js)
+    renderRadarChart(stats); // 아까 짠 차트 함수 호출
+    
+    appendLog(`[TWIN] 유저 ${userId} 시각화 동기화 완료 (점수: ${score}%)`, 'twin');
+  }
+}
+
+    // 2. 오각형 차트 그리기
+    const ctx = document.getElementById('userRadarChart').getContext('2d');
+    
+    // 기존 차트가 있으면 삭제하고 새로 생성 (중복 방지)
+    if (window.myRadar) window.myRadar.destroy();
+
+    window.myRadar = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['문법', '구조', '독해', '어휘', '논리'],
+        datasets: [{
+          label: '지식 숙련도 (%)',
+          data: [
+            stats.grammar_score * 100,
+            stats.structure_score * 100,
+            stats.reading_score * 100,
+            stats.vocabulary_score * 100,
+            stats.logic_score * 100
+          ],
+          backgroundColor: 'rgba(37, 99, 235, 0.2)', // Royal Blue 투명도
+          borderColor: '#2563eb',
+          pointBackgroundColor: '#2563eb',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            min: 0, max: 100,
+            beginAtZero: true,
+            ticks: { display: false }, // 숫자 숨김 (디자인용)
+            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    appendLog(`[TWIN] 유저 ${userId}의 오각형 분석 데이터 로드 완료`, 'twin');
+  } catch (err) {
+    console.error("차트 로드 실패:", err);
+  }
+}
+
+// 3. 페이지가 뜨자마자 차트를 그리도록 초기화 함수에 추가
+// app.js의 최하단 DOMContentLoaded 이벤트 안에서 fetchRadarData('115')를 호출하라능!
+
+
 });
