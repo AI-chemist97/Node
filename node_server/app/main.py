@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import supabase
-
+from pydantic import BaseModel
 app = FastAPI(title="Twin Edu API")
 
 # 프론트엔드 연결 허용 (CORS)
@@ -13,7 +13,29 @@ app.add_middleware(
 )
 
 # app/main.py
+class ProfileUpdate(BaseModel):
+    name: str = None
+    school_name: str = None
+    grade: str = None
+    region: str = None
+    target_university: str = None
+    target_major: str = None
 
+@app.patch("/api/users/{user_id}")
+def update_user_profile(user_id: str, profile: ProfileUpdate):
+    try:
+        # 데이터베이스 업데이트 실행
+        # profile.dict(exclude_unset=True)를 사용하여 값이 있는 필드만 업데이트
+        update_data = profile.dict(exclude_unset=True)
+        
+        response = supabase.table("users") \
+            .update(update_data) \
+            .eq("user_id", user_id) \
+            .execute()
+            
+        return response.data
+    except Exception as e:
+        return {"error": str(e)}
 # 유저 AI 통계 및 취약점 정보 가져오기
 @app.get("/api/user-stats/{user_id}")
 def get_user_stats(user_id: str):

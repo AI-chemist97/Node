@@ -19,123 +19,180 @@ window.Chart = Chart;
 /* ──────────────────────────────────────────
    1. 문제 데이터 (영문법/독해 유형 5문항)
 ────────────────────────────────────────── */
-const QUESTIONS = [
-  {
-    num: "01",
-    title: "다음 문장에서 밑줄 친 부분 중 어법상 틀린 것을 고르시오.",
-    formula:
-      "The number of students who <u>is</u> attending the seminar has increased.",
-    type: "영문법 · 주어-동사 수 일치",
-    opts: [
-      ["① who", false],
-      ["② is", true],
-      ["③ attending", false],
-      ["④ has", false],
-      ["⑤ increased", false],
-    ],
-    risk: 65,
-    reason:
-      "The number of 뒤의 관계절 내 동사 수 일치 오류입니다. 선행사가 복수명사(students)임을 인식하지 못하는 패턴이 감지됩니다.",
-    solutions: [
-      "The number of(단수) vs A number of(복수) 구별법 숙지",
-      "관계대명사절 내의 동사는 선행사에 수 일치함을 복습",
-      "복수 명사 뒤에 오는 단수 동사 함정 문제 주의",
-    ],
-  },
-  {
-    num: "02",
-    title: "빈칸에 들어갈 가장 적절한 관계대명사를 고르시오.",
-    formula:
-      "The manager rejected the proposal _________ contents were not clearly defined.",
-    type: "영문법 · 관계대명사",
-    opts: [
-      ["① which", false],
-      ["② who", false],
-      ["③ whose", true],
-      ["④ that", false],
-      ["⑤ whom", false],
-    ],
-    risk: 78,
-    reason:
-      "소유격 관계대명사의 쓰임에 대한 이해도가 낮습니다. 명사(contents)와의 소유 관계를 파악하지 못하고 목적격으로 오해하는 경향이 있습니다.",
-    solutions: [
-      "관계대명사 뒤에 완전한 명사구가 올 때 소유격(whose) 검토",
-      "선행사 '의' 명사로 해석되는지 연결 연습",
-      "격에 따른 관계대명사 선택 매트릭스 암기",
-    ],
-  },
-  {
-    num: "03",
-    title: "밑줄 친 부분의 어법이 올바르지 않은 것을 고르시오.",
-    formula:
-      "Keep the door <u>locking</u> when you leave the office for the day.",
-    type: "영문법 · 분사 (능동 vs 수동)",
-    opts: [
-      ["① Keep", false],
-      ["② locking", true],
-      ["③ when", false],
-      ["④ leave", false],
-      ["⑤ for the day", false],
-    ],
-    risk: 82,
-    reason:
-      "목적어(door)와 목적격 보어(locking)의 수동 관계를 능동으로 혼동하고 있습니다. 사물 목적어의 수동 패턴에서 취약점이 확인됩니다.",
-    solutions: [
-      "5형식 동사(Keep, Leave) + 목적어 + p.p. 형태 집중 훈련",
-      "문장의 대상이 동작을 하는지(ing), 당하는지(ed) 판단 연습",
-      "주요 빈출 타동사의 과거분사형 암기",
-    ],
-  },
-  {
-    num: "04",
-    title: "다음 문장의 빈칸에 알맞은 형태를 고르시오.",
-    formula:
-      "Not only the students but also the teacher _________ excited about the field trip.",
-    type: "영문법 · 상관접속사 수 일치",
-    opts: [
-      ["① are", false],
-      ["② is", true],
-      ["③ being", false],
-      ["④ have", false],
-      ["⑤ to be", false],
-    ],
-    risk: 55,
-    reason:
-      "상관접속사 Not only A but also B 구문에서 B에 동사를 일치시키는 원칙을 혼동하여 전체를 복수로 취급하는 오류가 빈번합니다.",
-    solutions: [
-      "상관접속사 주어 일치 원칙(가까운 주어 B에 일치) 정리",
-      "Either A or B, Neither A nor B 구문과 함께 비교 학습",
-      "단수 주어(the teacher)에 따른 동사 형태 재확인",
-    ],
-  },
-  {
-    num: "05",
-    title: "문맥상 밑줄 친 단어의 쓰임이 적절하지 않은 것을 고르시오.",
-    formula:
-      "The artificial intelligence system was <u>designed</u> to enhance efficiency and <u>minimizing</u> human error.",
-    type: "영문법 · 병렬 구조",
-    opts: [
-      ["① artificial", false],
-      ["② designed", false],
-      ["③ enhance", false],
-      ["④ efficiency", false],
-      ["⑤ minimizing", true],
-    ],
-    risk: 89,
-    reason:
-      "to부정사에 연결되는 동사원형의 병렬 구조를 파악하지 못하고 있습니다. and 뒤의 형태를 앞의 분사(designed)와 혼동하는 패턴입니다.",
-    solutions: [
-      "등위접속사(and, or) 앞뒤의 문법적 형태 일치 연습",
-      "to (enhance) and (minimize) 구조 분석",
-      "긴 문장에서의 병렬 구조 찾기 구문 독해 병행",
-    ],
-  },
-];
+// const QUESTIONS = [
+//   {
+//     num: "01",
+//     title: "다음 문장에서 밑줄 어법상 틀린 것을 고르시오.",
+//     formula:
+//       "The number of students who is attending the seminar has increased.",
+//     type: "영문법 · 주어-동사 수 일치",
+//     opts: [
+//       ["who", false],
+//       ["is", true],
+//       ["attending", false],
+//       ["has", false],
+//       ["increased", false],
+//     ],
+//     risk: 65,
+//     reason:
+//       "The number of 뒤의 관계절 내 동사 수 일치 오류입니다. 선행사가 복수명사(students)임을 인식하지 못하는 패턴이 감지됩니다.",
+//     solutions: [
+//       "The number of(단수) vs A number of(복수) 구별법 숙지",
+//       "관계대명사절 내의 동사는 선행사에 수 일치함을 복습",
+//       "복수 명사 뒤에 오는 단수 동사 함정 문제 주의",
+//     ],
+//   },
+//   {
+//     num: "02",
+//     title: "빈칸에 들어갈 가장 적절한 관계대명사를 고르시오.",
+//     formula:
+//       "The manager rejected the proposal _________ contents were not clearly defined.",
+//     type: "영문법 · 관계대명사",
+//     opts: [
+//       ["which", false],
+//       ["who", false],
+//       ["whose", true],
+//       ["that", false],
+//       ["whom", false],
+//     ],
+//     risk: 78,
+//     reason:
+//       "소유격 관계대명사의 쓰임에 대한 이해도가 낮습니다. 명사(contents)와의 소유 관계를 파악하지 못하고 목적격으로 오해하는 경향이 있습니다.",
+//     solutions: [
+//       "관계대명사 뒤에 완전한 명사구가 올 때 소유격(whose) 검토",
+//       "선행사 '의' 명사로 해석되는지 연결 연습",
+//       "격에 따른 관계대명사 선택 매트릭스 암기",
+//     ],
+//   },
+//   {
+//     num: "03",
+//     title: "다음 문장에서 어법이 올바르지 않은 것을 고르시오.",
+//     formula: "Keep the door locking when you leave the office for the day.",
+//     type: "영문법 · 분사 (능동 vs 수동)",
+//     opts: [
+//       ["Keep", false],
+//       ["locking", true],
+//       ["when", false],
+//       ["leave", false],
+//       ["for the day", false],
+//     ],
+//     risk: 82,
+//     reason:
+//       "목적어(door)와 목적격 보어(locking)의 수동 관계를 능동으로 혼동하고 있습니다. 사물 목적어의 수동 패턴에서 취약점이 확인됩니다.",
+//     solutions: [
+//       "5형식 동사(Keep, Leave) + 목적어 + p.p. 형태 집중 훈련",
+//       "문장의 대상이 동작을 하는지(ing), 당하는지(ed) 판단 연습",
+//       "주요 빈출 타동사의 과거분사형 암기",
+//     ],
+//   },
+//   {
+//     num: "04",
+//     title: "다음 문장의 빈칸에 알맞은 형태를 고르시오.",
+//     formula:
+//       "Not only the students but also the teacher _________ excited about the field trip.",
+//     type: "영문법 · 상관접속사 수 일치",
+//     opts: [
+//       ["are", false],
+//       ["is", true],
+//       ["being", false],
+//       ["have", false],
+//       ["to be", false],
+//     ],
+//     risk: 55,
+//     reason:
+//       "상관접속사 Not only A but also B 구문에서 B에 동사를 일치시키는 원칙을 혼동하여 전체를 복수로 취급하는 오류가 빈번합니다.",
+//     solutions: [
+//       "상관접속사 주어 일치 원칙(가까운 주어 B에 일치) 정리",
+//       "Either A or B, Neither A nor B 구문과 함께 비교 학습",
+//       "단수 주어(the teacher)에 따른 동사 형태 재확인",
+//     ],
+//   },
+//   {
+//     num: "05",
+//     title: "문맥상 단어의 쓰임이 적절하지 않은 것을 고르시오.",
+//     formula:
+//       "The artificial intelligence system was designed to enhance efficiency and minimizing human error.",
+//     type: "영문법 · 병렬 구조",
+//     opts: [
+//       ["artificial", false],
+//       ["designed", false],
+//       ["enhance", false],
+//       ["efficiency", false],
+//       ["minimizing", true],
+//     ],
+//     risk: 89,
+//     reason:
+//       "to부정사에 연결되는 동사원형의 병렬 구조를 파악하지 못하고 있습니다. and 뒤의 형태를 앞의 분사(designed)와 혼동하는 패턴입니다.",
+//     solutions: [
+//       "등위접속사(and, or) 앞뒤의 문법적 형태 일치 연습",
+//       "to (enhance) and (minimize) 구조 분석",
+//       "긴 문장에서의 병렬 구조 찾기 구문 독해 병행",
+//     ],
+//   },
+// ];
 
+let QUESTIONS = []; // 하드코딩된 배열 삭제 후 빈 배열로 초기화
 /* ──────────────────────────────────────────
    1.5. 서버 연결 설정 (추가됨)
 ────────────────────────────────────────── */
+async function loadQuestionsFromSupabase() {
+  appendLog("[SYSTEM] 데이터베이스에서 문항 동기화 중...", "info");
 
+  try {
+    const { data, error } = await supabase
+      .from("problems")
+      .select("*")
+      .limit(5);
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      // 데이터 매핑: DB 컬럼명을 프론트엔드용 객체 키로 변환
+      QUESTIONS = data.map((item, index) => {
+        return {
+          num: (index + 1).toString().padStart(2, "0"),
+          title: "다음 질문에 대한 가장 적절한 답을 고르시오.",
+          formula: item.formula,
+          type: item.tags || "기타",
+
+          // 핵심 수정: 인덱스 i를 사용하여 정답 여부 판단
+          opts: (item.options || []).map((opt, i) => {
+            const text = typeof opt === "object" ? opt.text : opt;
+
+            return [
+              text,
+              // item.correct_answer가 숫자(0,1,2,3)라면 i와 비교
+              // 혹시 모르니 Number()로 형변환하여 엄격하게 비교함
+              i === Number(item.correct_answer),
+            ];
+          }),
+
+          risk: item.risk || Math.floor(Math.random() * 40) + 40,
+          reason: "패턴 분석 결과 취약 구간으로 확인되었습니다.",
+          solutions: ["해당 문법 개념 재확인", "유사 문제 풀이 권장"],
+        };
+      });
+
+      // 무작위 셔플
+      QUESTIONS.sort(() => Math.random() - 0.5);
+      console.log(QUESTIONS);
+
+      // UI 컴포넌트 갱신
+      buildRiskList();
+      updateQuickNav();
+
+      // 데이터 로드 성공 후 첫 번째 문제 바로 표시 (에러 방지)
+      if (QUESTIONS.length > 0) initQuiz(0);
+
+      appendLog(
+        `[SUCCESS] ${QUESTIONS.length}개의 문항 로드 및 매핑 완료`,
+        "ok",
+      );
+    }
+  } catch (err) {
+    appendLog(`[ERROR] DB 로드 실패: ${err.message}`, "error");
+  }
+}
 async function updateAIVisualization(userId = "115") {
   const statsRow = document.getElementById("statsRow");
   const dataContainer = document.getElementById("dashboardDataContainer");
@@ -181,8 +238,15 @@ async function updateAIVisualization(userId = "115") {
 
     const users = await resUser.json();
     const stats = await resStats.json();
-    console.log(users);
+    console.log(users.name);
+    document.getElementById("profileCardInitial").textContent =
+      users.name.charAt(0);
 
+    document.getElementById("profileCardName").textContent = users.name;
+    document.getElementById("profileCardDetail").textContent =
+      `${users.grade} · ${users.region}`;
+    document.getElementById("profileCardGoal").textContent =
+      `목표: ${users.target_university} ${users.target_major}`;
     if (users.error || stats.error) {
       appendLog(`[ERROR] 유저 데이터 로드 실패`, "error");
       nameDisplays.forEach((el) => (el.textContent = "정보 없음"));
@@ -558,7 +622,16 @@ function renderRadarChart(stats) {
   });
 }
 function initQuiz(idx) {
+  // QUESTIONS가 없거나 비어있는 경우 처리
+  if (!QUESTIONS || QUESTIONS.length === 0) {
+    appendLog("[WARN] 표시할 문항 데이터가 없습니다.", "warn");
+    return;
+  }
   const q = QUESTIONS[idx];
+  if (!q) {
+    console.error(`Index ${idx} 에 해당하는 문제가 없습니다.`);
+    return;
+  }
   currentQ = idx;
 
   document.getElementById("qNum").textContent = "Q." + q.num;
@@ -642,32 +715,31 @@ function initQuiz(idx) {
 function selectOption(btn, isCorrect, optIdx) {
   const q = QUESTIONS[currentQ];
 
+  // [수정] document.querySelectorAll을 통해 모든 선택지 버튼을 먼저 가져옵니다.
   const allBtns = document.querySelectorAll(".q-opt-btn");
+
+  // 1. 모든 버튼 비활성화 및 진짜 정답(isCorrect === true) 표시
   allBtns.forEach((b) => {
-    b.disabled = true;
+    b.disabled = true; // 클릭 방지
+
+    // 데이터 매핑 시 넣어준 dataset.correct 값이 "true"인 버튼을 찾아 초록색으로 변경
     if (b.dataset.correct === "true") {
       b.classList.add("correct");
     }
   });
 
+  // 2. 사용자가 클릭한 버튼에 대한 결과 처리
   if (isCorrect) {
-    btn.classList.add("correct");
+    // 맞췄을 경우 (이미 위에서 correct 클래스가 붙음)
     answered[currentQ] = "correct";
     showResultMsg(true, q);
-    appendLog(`[TWIN] ✓ 패턴 일치 — Q.${q.num} 정답 확인`, "ok");
-    appendLog(`[ANAL] 풀이 패턴이 트윈 예측과 일치합니다.`, "info");
-    appendLog(`[SYNC] 트윈 싱크율 +0.3% 업데이트`, "twin");
+    appendLog(`[TWIN] ✓ 정답 확인 — 패턴 일치`, "ok");
   } else {
+    // 틀렸을 경우: 클릭한 버튼에만 빨간색(wrong) 추가
     btn.classList.add("wrong");
     answered[currentQ] = "wrong";
     showResultMsg(false, q);
-    appendLog(`[TWIN] ✗ 트윈 예측 실패 — Q.${q.num} 오답 감지`, "error");
-    appendLog(`[ANAL] 오답 패턴 기록 중... 데이터베이스 업데이트`, "warn");
-    appendLog(`[RISK] 해당 유형 위험도 +5% 조정`, "error");
-    appendLog(
-      `[TWIN] 트윈 분석 보기를 클릭하여 오답 원인을 확인하세요.`,
-      "twin",
-    );
+    appendLog(`[TWIN] ✗ 오답 감지 — 정답을 확인하세요`, "error");
   }
 
   updateQuickNav();
@@ -676,12 +748,18 @@ function selectOption(btn, isCorrect, optIdx) {
 
 function showResultMsg(isCorrect, q) {
   const msg = document.getElementById("qResultMsg");
+  if (!msg) return;
+
+  // q.opts 배열에서 [텍스트, true] 형태인 요소를 찾습니다.
+  const correctOpt = q.opts.find((opt) => opt[1] === true);
+  const correctAnswerText = correctOpt ? correctOpt[0] : "정답 없음";
+
   if (isCorrect) {
     msg.className = "q-result-msg show-correct";
-    msg.textContent = "✓ 정답입니다! 트윈 예측과 풀이 패턴이 일치합니다.";
+    msg.innerHTML = `✓ <strong>정답입니다!</strong>`;
   } else {
     msg.className = "q-result-msg show-wrong";
-    msg.textContent = `✗ 오답입니다. 트윈이 예측한 오답 확률: ${q.risk}% — 분석 보기를 클릭하세요.`;
+    msg.innerHTML = `✗ <strong>오답입니다.</strong> 정답은 <strong>"${correctAnswerText}"</strong> 입니다.`;
   }
 }
 
@@ -884,38 +962,85 @@ function closeProfileModal(e) {
   document.getElementById("profileModalOverlay").classList.remove("open");
 }
 
-function saveProfile() {
-  const userName = document.getElementById("inputName").value || "김노드";
-  const school = document.getElementById("inputSchool").value || "서울고등학교";
-  const grade = document.getElementById("selectGrade").value;
-  const region = document.getElementById("inputRegion").value || "서울";
-  const email = document.getElementById("inputEmail").value;
-  const university = document.getElementById("inputUniversity").value;
-  const major = document.getElementById("inputMajor").value;
+/* ──────────────────────────────────────────
+   프로필 정보 DB 업데이트 및 UI 반영
+────────────────────────────────────────── */
+/* ──────────────────────────────────────────
+   프로필 정보 저장 (백엔드 PATCH API 사용)
+────────────────────────────────────────── */
+window.saveProfile = async () => {
+  // 현재 조회 중인 유저 ID 가져오기 (기본값 115)
+  const userId = document.getElementById("userInputId")?.value.trim() || "115";
+  const schoolName =
+    document.getElementById("inputSchool").value || "서울고등학교";
+  const rawGrade = document.getElementById("selectGrade").value;
 
-  const initial = userName.charAt(0);
-  document.getElementById("profileInitial").textContent = initial;
-  document.getElementById("profileName").textContent = userName;
-  document.getElementById("heroName").textContent = userName;
-  document.getElementById("profileGrade").textContent = `고등학교 ${grade}학년`;
+  const formattedGrade = schoolName.includes("중학")
+    ? `중학교 ${rawGrade}학년`
+    : `고등학교 ${rawGrade}학년`;
+  // 1. 폼 데이터 수집
+  const profileData = {
+    user_name: document.getElementById("inputName").value || "김노드",
+    school_name: schoolName,
+    grade: formattedGrade, // 가공된 학년 데이터 삽입
+    region: document.getElementById("inputRegion").value,
+    target_university: document.getElementById("inputUniversity").value,
+    target_major: document.getElementById("inputMajor").value,
+  };
 
-  document.getElementById("profileCardInitial").textContent = initial;
-  document.getElementById("profileCardName").textContent = userName;
-  document.getElementById("profileCardDetail").textContent =
-    `고등학교 ${grade}학년 · ${region}`;
-  document.getElementById("profileCardGoal").textContent =
-    `목표: ${university} ${major}`;
+  try {
+    appendLog(`[SYSTEM] 유저 ${userId} 데이터 서버 전송 중...`, "info");
 
-  updateSyncRing();
-  appendLog(
-    `[TWIN] 프로필 정보 업데이트 — ${name} (${university} ${major})`,
-    "twin",
-  );
-  appendLog(`[SYNC] 트윈 동기화율 +1.2% 조정`, "ok");
-  showSaveStatus();
+    // 2. 백엔드 페치(fetch) API 호출 (PATCH 방식)
+    const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(profileData), // 수집한 데이터를 JSON으로 변환
+    });
 
-  closeProfileModal();
-}
+    if (!response.ok) {
+      const errorDetail = await response.json();
+      throw new Error(errorDetail.error || "서버 응답 오류");
+    }
+
+    const result = await response.json();
+    console.log("서버 저장 완료:", result);
+
+    // 3. UI 요소 즉시 업데이트
+    const initial = profileData.user_name.charAt(0);
+
+    // 사이드바 업데이트
+    document.getElementById("profileInitial").textContent = initial;
+    document.getElementById("profileName").textContent = profileData.user_name;
+    document.getElementById("profileGrade").textContent =
+      `고등학교 ${profileData.grade}학년`;
+
+    // 설정 페이지 프로필 카드 업데이트
+    if (document.getElementById("profileCardName")) {
+      document.getElementById("profileCardInitial").textContent = initial;
+      document.getElementById("profileCardName").textContent =
+        profileData.user_name;
+      document.getElementById("profileCardDetail").textContent =
+        `고등학교 ${profileData.grade}학년 · ${profileData.region}`;
+      document.getElementById("profileCardGoal").textContent =
+        `목표: ${profileData.target_university} ${profileData.target_major}`;
+    }
+
+    // 성공 로그 및 효과
+    if (typeof updateSyncRing === "function") updateSyncRing();
+    appendLog(`[SUCCESS] 서버 동기화 완료 — ${profileData.user_name}`, "twin");
+    if (typeof showSaveStatus === "function") showSaveStatus();
+
+    // 모달 닫기
+    closeProfileModal();
+  } catch (err) {
+    appendLog(`[ERROR] 서버 저장 실패: ${err.message}`, "error");
+    console.error("Fetch API Error:", err);
+    alert("정보를 저장하는 중 서버 에러가 발생했습니다.");
+  }
+};
 
 function updateSyncRing() {
   const syncRing = document.querySelector(".sync-ring");
@@ -1110,12 +1235,14 @@ function startAmbientLogs() {
 /* ──────────────────────────────────────────
    19. 초기화 (DOMContentLoaded)
 ────────────────────────────────────────── */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   setCurrentDate();
   fetchQuestionsFromServer();
   buildRiskList();
   animateSyncBars();
+  await loadQuestionsFromSupabase();
   startAmbientLogs();
+
   updateAIVisualization("115");
   setTimeout(() => {
     const correctEl = document.getElementById("correctCount");
@@ -1123,7 +1250,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (correctEl) animateNumber(correctEl, 0, 12, 1200, "");
     if (riskEl) animateNumber(riskEl, 0, 3, 800, "");
   }, 400);
-
   setTimeout(() => {
     appendLog("[TWIN] 대시보드 로드 완료 — 오늘의 학습 현황 분석 중", "twin");
     appendLog("[PRED] 위험 문항 3개 예보 완료 (Q.02, Q.04, Q.05)", "warn");

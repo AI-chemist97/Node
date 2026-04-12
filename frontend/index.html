@@ -758,16 +758,14 @@
             <div class="section-title">프로필 정보</div>
             <div class="profile-card">
               <div class="profile-card-avatar">
-                <span id="profileCardInitial">김</span>
+                <span id="profileCardInitial">?</span>
               </div>
               <div class="profile-card-info">
-                <p class="profile-card-name" id="profileCardName">김노드</p>
-                <p class="profile-card-detail" id="profileCardDetail">
-                  고등학교 2학년 · 서울
+                <p class="profile-card-name" id="profileCardName">
+                  사용자 정보 없음
                 </p>
-                <p class="profile-card-goal" id="profileCardGoal">
-                  목표: 서울대학교 공학계열
-                </p>
+                <p class="profile-card-detail" id="profileCardDetail"></p>
+                <p class="profile-card-goal" id="profileCardGoal"></p>
               </div>
               <button class="btn-edit-profile" onclick="openProfileModal()">
                 <svg
@@ -1053,37 +1051,42 @@
               />
             </div>
 
-            <div class="form-row">
-              <div class="form-group" style="flex: 1">
-                <label class="form-label">학년</label>
-                <select id="selectGrade" class="form-input">
-                  <option value="1">1학년</option>
-                  <option value="2" selected>2학년</option>
-                  <option value="3">3학년</option>
-                </select>
-              </div>
-              <div class="form-group" style="flex: 1">
-                <label class="form-label">지역</label>
-                <input
-                  type="text"
-                  id="inputRegion"
-                  class="form-input"
-                  placeholder="지역"
-                  value="서울"
-                />
-              </div>
-            </div>
+<div class="form-row">
+  <div class="form-group" style="flex: 1">
+    <label class="form-label">학년</label>
+    <select id="selectGrade" class="form-input">
+      <option value="1">1학년</option>
+      <option value="2" selected>2학년</option>
+      <option value="3">3학년</option>
+    </select>
+  </div>
+<div class="form-group" style="flex: 1">
+    <label class="form-label">지역</label>
+    <select id="inputRegion" class="form-input">
+      <option value="서울">서울</option>
+      <option value="경기">경기</option>
+      <option value="인천">인천</option>
+      <option value="대전">대전</option>
+      <option value="대구">대구</option>
+      <option value="부산">부산</option>
+      <option value="광주">광주</option>
+      <option value="울산">울산</option>
+      <option value="세종">세종</option>
+    </select>
+  </div>
+</div>
 
-            <div class="form-group">
-              <label class="form-label">이메일</label>
-              <input
-                type="email"
-                id="inputEmail"
-                class="form-input"
-                placeholder="이메일"
-                value="kimnode@school.kr"
-              />
-            </div>
+<div class="form-group">
+  <label class="form-label">이메일 (변경 불가)</label>
+  <input
+    type="email"
+    id="inputEmail"
+    class="form-input"
+    style="background-color: #f3f4f6; cursor: not-allowed;" 
+    placeholder="이메일"
+    value="kimnode@school.kr"
+    readonly 
+  /> </div>
 
             <div class="form-group">
               <label class="form-label">목표 대학</label>
