@@ -853,6 +853,33 @@ body {
   line-height: 1.5;
 }
 
+/* 로딩 스피너 스타일 */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 히어로 섹션용 큰 스피너 */
+.spinner-lg {
+  width: 40px;
+  height: 40px;
+  border-width: 4px;
+  border-top-color: var(--blue); /* 혹은 강조색 */
+}
+
 /* ============ SIMULATOR LAYOUT ============ */
 .sim-layout {
   display: grid;

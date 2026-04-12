@@ -137,52 +137,247 @@ const QUESTIONS = [
 ────────────────────────────────────────── */
 
 async function updateAIVisualization(userId = "115") {
+  const statsRow = document.getElementById("statsRow");
+  const dataContainer = document.getElementById("dashboardDataContainer");
+  const statusArea = document.getElementById("dashboardLoadingOrEmpty");
+  const statusMsg = document.getElementById("dashboardStatusMsg");
+  const statusIcon = document.getElementById("dashboardStatusIcon");
+  const riskBadgeCount = document.getElementById("riskBadgeCount");
+  if (!statsRow) {
+    console.error("HTML에 'statsRow' ID를 가진 요소가 없습니다. 확인 바람!");
+    return;
+  }
   try {
-    // [Step 1] 백엔드 API로부터 유저 통계 및 한글 취약점 매핑 데이터 가져오기
-    const response = await fetch(`${API_BASE_URL}/api/user-stats/${userId}`);
-    const stats = await response.json();
+    // [Step 0] 로딩 애니메이션(스피너) 주입
 
-    if (stats.error) {
-      appendLog(`[ERROR] 유저 ${userId} 데이터가 없습니다.`, "error");
-      alert("유저 데이터를 찾을 수 없다능!");
+    const nameDisplays = document.querySelectorAll(".profile-name-display");
+    const riskCountEl = document.getElementById("heroRiskCount");
+    const initialEl = document.getElementById("profileInitial");
+    // [1] 로딩 상태 시작
+    dataContainer.style.display = "none";
+    statusArea.style.display = "block";
+    statusIcon.innerHTML = '<div class="spinner spinner-lg"></div>';
+    statusMsg.textContent = "AI 분석 데이터를 동기화 중입니다...";
+    // 글자 대신 뺑글뺑글 도는 스피너 넣기
+    nameDisplays.forEach((el) => {
+      el.innerHTML = '<div class="spinner"></div>';
+    });
+    if (riskCountEl) {
+      riskCountEl.innerHTML = '<div class="spinner spinner-lg"></div>';
+    }
+    if (initialEl) {
+      initialEl.innerHTML =
+        '<div class="spinner" style="width:14px; height:14px;"></div>';
+    }
+
+    // 로딩 처리
+    statsRow.innerHTML = '<div class="spinner spinner-lg"></div>';
+    // [Step 1] API 호출 (유저 정보 + AI 통계)
+    // 두 API를 동시에 호출해서 속도를 높입니다 (Promise.all 활용)
+    const [resUser, resStats] = await Promise.all([
+      fetch(`${API_BASE_URL}/api/users/${userId}`),
+      fetch(`${API_BASE_URL}/api/user-stats/${userId}`),
+    ]);
+
+    const users = await resUser.json();
+    const stats = await resStats.json();
+    console.log(users);
+
+    if (users.error || stats.error) {
+      appendLog(`[ERROR] 유저 데이터 로드 실패`, "error");
+      nameDisplays.forEach((el) => (el.textContent = "정보 없음"));
+      if (riskCountEl) riskCountEl.textContent = "-";
       return;
     }
-    console.log("!!!!!", stats);
-    // [Step 2] 프로필 및 대시보드 텍스트 업데이트
-    const userName = stats.user_name || `유저 ${userId}`;
-    document.getElementById("profileName").textContent = userName;
-    document.getElementById("profileInitial").textContent = userName.charAt(0);
+    const riskCount = stats.weak_category ? stats.weak_category.length : 0;
 
-    // 점수 및 싱크율 업데이트
-    const score = Math.round(stats.predicted_score * 100);
-    document.getElementById("syncPercent").textContent = score;
+    const heroTitleContainer = document.getElementById("heroTitleContainer");
+    if (heroTitleContainer) {
+      heroTitleContainer.innerHTML = `
+        <h1 class="hero-title">
+          ${users.name} 님의 트윈이<br />
+          <span class="hero-accent">${riskCount}개 오답 위험</span>을 예보했습니다
+        </h1>`;
+    }
+    // 2. 서브 텍스트 및 상태 태그 변경
+    const heroSubText = document.getElementById("heroSubText");
+    if (heroSubText) {
+      heroSubText.innerHTML = `AI 분신이 오늘 영어 시뮬레이션을 완료했습니다.<br />지금 바로 위험 구간을 확인하고 선제 학습을 시작하세요.`;
+    }
 
-    // [Step 3] 취약 영역(위험 알림) 리스트 갱신 (한글 이름 적용)
+    const statusText = document.getElementById("statusText");
+    if (statusText) statusText.textContent = "AI 트윈 동기화 완료";
+
+    // 3. 버튼 영역 보이기 (display: none 해제)
+    const heroActions = document.getElementById("heroActions");
+    if (heroActions) heroActions.style.display = "flex";
+
+    document.getElementById("inputName").value = users.name || "";
+    document.getElementById("inputSchool").value =
+      users.school_name ||
+      (users.grade?.includes("중") ? "가상중학교" : "가상고등학교");
+    document.getElementById("selectGrade").value = users.grade_num || "2"; // 학년 숫자만 저장된 컬럼 가정
+    document.getElementById("inputRegion").value = users.region || "서울";
+    document.getElementById("inputEmail").value = users.email || "";
+    document.getElementById("inputUniversity").value =
+      users.target_university || "미래국립대학교";
+    document.getElementById("inputMajor").value =
+      users.target_major || "공학계열";
+    // 4. 차트 및 레이더 표시
+    const radarMessage = document.getElementById("radarMessage");
+    const userRadarChart = document.getElementById("userRadarChart");
+    const syncOrb = document.getElementById("syncOrb");
+
+    if (radarMessage) radarMessage.style.display = "none";
+    if (userRadarChart) userRadarChart.style.display = "block";
+    if (syncOrb) syncOrb.style.display = "flex";
+    const syncPct = Math.round((Number(stats.predicted_score) || 0) * 100);
+
+    // [Step 3] 오답 위험 카운트 업데이트
+    if (riskCountEl) {
+      // 숫자 애니메이션 효과
+      animateNumber(riskCountEl, 0, riskCount, 800, "");
+    }
+    // A. Stats Row (4개 카드)
+    document.getElementById("statsRow").innerHTML =
+      `${createStatCardHTML("stat-blue", "정답 예측 건수", stats.correct_predict || 0, "", "check")}
+      ${createStatCardHTML("stat-red", "오답 위험 건수", riskCount, riskCount > 0 ? "주의 필요" : "안전 구역", "alert")}
+      ${createStatCardHTML("stat-purple", "오늘 학습 시간", "2h 34m", "목표 달성 중", "clock")}
+      ${createStatCardHTML("stat-green", "트윈 싱크율", syncPct, "+5% 이번 주", "pulse", "%")}`;
+
+    // 데이터 컨테이너 보여주기
+    if (dataContainer) dataContainer.style.display = "block";
+    // [Step 2] 이름 및 프로필 업데이트 (스피너가 텍스트로 대체됨)
+    const userName = users.name || `유저 ${userId}`;
+    const userGrade = users.grade || "학년 정보 없음";
+    nameDisplays.forEach((el) => {
+      el.textContent = userName;
+    });
+    if (initialEl) {
+      document.getElementById("profileName").textContent = userName;
+      document.getElementById("profileGrade").textContent = userGrade;
+      initialEl.textContent = userName.charAt(0);
+    }
+
+    // B. Twin Sync Bar (막대 그래프)
+    const syncData = [
+      {
+        label: "영문법 (수 일치/시제)",
+        val: (stats.grammar_score || 0) * 100,
+        color: "#2563eb",
+      },
+      {
+        label: "구문 독해 (관계사)",
+        val: (stats.structure_score || 0) * 100,
+        color: "#7c3aed",
+      },
+      {
+        label: "작문",
+        val: (stats.reading_score || 0) * 100,
+        color: "#059669",
+      },
+      {
+        label: "어휘 숙련도",
+        val: (stats.vocabulary_score || 0) * 100,
+        color: "#d97706",
+      },
+    ];
+    console.log(syncData);
+    document.getElementById("syncBars").innerHTML = syncData
+      .map(
+        (d) => `
+      <div class="sync-bar-item">
+        <div class="sync-bar-label"><span>${d.label}</span><span class="sync-bar-pct">${Math.round(d.val)}%</span></div>
+        <div class="sync-bar-track"><div class="sync-bar-fill" style="width: ${d.val}%; background: ${d.color}"></div></div>
+      </div>
+    `,
+      )
+      .join("");
+
+    // C. 위험 알림 & 패턴 리스트
+    if (riskBadgeCount) riskBadgeCount.textContent = `${riskCount}건`;
     const riskList = document.getElementById("riskList");
-    if (riskList && stats.weak_tag_names) {
+    if (stats.weak_tag_names && stats.weak_tag_names.length > 0) {
       riskList.innerHTML = stats.weak_tag_names
         .map(
           (name) => `
-        <div class="risk-item">
-            <span class="risk-item-body">${name}</span>
-            <span class="risk-item-pct">위험</span>
-        </div>
+        <div class="risk-item"><span class="risk-item-body">${name}</span><span class="risk-item-pct">위험</span></div>
       `,
         )
         .join("");
+    } else {
+      riskList.innerHTML =
+        '<div style="color:gray; padding:20px; text-align:center;">감지된 위험 요소가 없습니다.</div>';
     }
 
-    // [Step 4] 오각형 지식 차트 갱신
+    // 패턴 리스트 (데이터가 있을 때 예시 패턴 생성)
+    document.getElementById("patternList").innerHTML = `
+      ${createPatternItemHTML("warn", "풀이 시간 이상 감지", `Q.05 평균 풀이 시간 ${Math.floor(Math.random() * 3 + 3)}분 초과`)}
+      ${createPatternItemHTML("info", "반복 오답 유형 감지", "수동태-능동태 전환 문제에서 실수 패턴 감지")}
+      ${createPatternItemHTML("ok", "강점 유형 확인", "어휘 및 숙어 문제에서 높은 정답률 유지")}
+    `;
+
+    // UI 전환
+    statusArea.style.display = "none";
+    dataContainer.style.display = "block";
+    const riskBadge = document.querySelector(".badge-red");
+    if (riskBadge) riskBadge.textContent = `${riskCount}건`;
+
+    // [Step 4] 점수 및 싱크율 업데이트
+    const score = Math.round((Number(stats.predicted_score) || 0) * 100);
+    const syncPercentEl = document.getElementById("syncPercent");
+    if (syncPercentEl) {
+      animateNumber(syncPercentEl, 0, score, 1000, "");
+    }
+
+    // [Step 5] 취약 영역 리스트 및 차트 갱신
+
     renderRadarChart(stats);
 
     appendLog(
-      `[SYSTEM] 유저 ${userId} AI 트윈 동기화 완료 (점수: ${score}%)`,
+      `[SYSTEM] 유저 ${userName} AI 트윈 동기화 완료 (점수: ${score}%)`,
       "ok",
     );
   } catch (err) {
     console.error("데이터 로드 실패:", err);
     appendLog(`[ERROR] 네트워크 연결 실패`, "error");
+    document
+      .querySelectorAll(".profile-name-display")
+      .forEach((el) => (el.textContent = "에러"));
+    if (document.getElementById("heroRiskCount")) {
+      document.getElementById("heroRiskCount").textContent = "!";
+      statusArea.style.display = "block";
+      dataContainer.style.display = "none";
+      statusIcon.innerHTML = "🔍";
+      statusMsg.textContent = "해당 유저의 분석 데이터를 찾을 수 없습니다.";
+    }
   }
+}
+
+// 헬퍼: 통계 카드 HTML
+function createStatCardHTML(type, label, val, change, iconType, unit = "") {
+  return `
+    <div class="stat-card ${type}">
+      <div class="stat-body">
+        <p class="stat-label">${label}</p>
+        <p class="stat-value">${val}${unit ? `<span style="font-size:1rem">${unit}</span>` : ""}</p>
+        <p class="stat-change">${change}</p>
+      </div>
+    </div>`;
+}
+// 헬퍼: 패턴 아이템 HTML
+function createPatternItemHTML(type, title, desc) {
+  const iconPath =
+    type === "warn"
+      ? "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+      : "M20 6L9 17l-5-5";
+  return `
+    <div class="pattern-item">
+      <div class="pattern-icon pattern-${type}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="${iconPath}"/></svg>
+      </div>
+      <div class="pattern-body"><p class="pattern-title">${title}</p><p class="pattern-desc">${desc}</p></div>
+    </div>`;
 }
 
 async function fetchQuestionsFromServer() {
@@ -192,11 +387,11 @@ async function fetchQuestionsFromServer() {
     const response = await fetch(`${API_BASE_URL}/api/questions`);
 
     const serverData = await response.json();
-    console.log("서버데이터", serverData);
+    // console.log("서버데이터", serverData);
     if (serverData && serverData.length > 0) {
       // 서버에서 받은 데이터로 QUESTIONS 배열을 덮어씌웁니다.
       // 데이터 형식이 EdNet 규격일 경우 매핑 로직이 추가로 필요할 수 있습니다.
-      console.log("서버 데이터 로드 완료:", serverData);
+      // console.log("서버 데이터 로드 완료:", serverData);
       // QUESTIONS.push(...serverData); // 기존 데이터에 추가할 경우
     }
   } catch (error) {
@@ -281,7 +476,6 @@ async function startAISimulator(userId) {
   }
 }
 
-// 오각형 차트 그리기 (중복 제거된 단일 함수)
 function renderRadarChart(stats) {
   const canvas = document.getElementById("userRadarChart");
   if (!canvas) return;
@@ -303,16 +497,16 @@ function renderRadarChart(stats) {
             (stats.vocabulary_score || 0) * 100,
             (stats.logic_score || 0) * 100,
           ],
-          // 채우기 색상: 로얄 블루에 투명도 부여
-          backgroundColor: "rgba(37, 99, 235, 0.4)",
-          // 테두리 선: 밝은 파란색
+          // 데이터 영역 색상 (메인 블루)
+          backgroundColor: "rgba(37, 99, 235, 0.5)",
           borderColor: "#60a5fa",
-          // 데이터 포인트: 흰색 테두리로 강조
+          borderWidth: 3,
+          // 꼭짓점 스타일링
           pointBackgroundColor: "#ffffff",
           pointBorderColor: "#2563eb",
-          pointHoverBackgroundColor: "#2563eb",
-          pointHoverBorderColor: "#ffffff",
-          borderWidth: 3,
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
         },
       ],
     },
@@ -322,41 +516,47 @@ function renderRadarChart(stats) {
           min: 0,
           max: 100,
           beginAtZero: true,
-          // 1. 거미줄 그리드 색상 (연한 흰색)
+          // 오각형 거미줄(그리드) 설정
           grid: {
-            color: "rgba(255, 255, 255, 0.2)",
+            color: "rgba(255, 255, 255, 0.15)", // 연한 흰색 라인
+            circular: false, // 이 부분을 false로 해야 원형이 아닌 '다각형'으로 그려짐!
           },
-          // 2. 각도별 라인 색상
+          // 중심에서 뻗어나가는 선
           angleLines: {
-            color: "rgba(255, 255, 255, 0.2)",
+            display: true,
+            color: "rgba(255, 255, 255, 0.3)",
+            lineWidth: 1,
           },
-          // 3. 외부 라벨 (문법, 구조 등) 글자색을 흰색으로!
+          // 텍스트 라벨 (문법, 구조 등)
           pointLabels: {
             color: "#ffffff",
             font: {
-              size: 13,
-              weight: "600",
+              size: 14,
+              weight: "bold",
               family: "Noto Sans KR",
             },
+            padding: 15, // 도형과 글자 사이 간격
           },
-          // 4. 내부 숫자 표시 안 함 (깔끔하게)
           ticks: {
-            display: false,
+            display: false, // 숫자 숨김
+            stepSize: 20, // 그리드 간격 (5단계 오각형 생성)
           },
         },
       },
       plugins: {
-        // 범례 숨김
-        legend: {
-          display: false,
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: (context) => ` 숙련도: ${context.raw}%`,
+          },
         },
       },
-      // 반응형 설정
+      responsive: true,
       maintainAspectRatio: false,
     },
   });
 }
-
 function initQuiz(idx) {
   const q = QUESTIONS[idx];
   currentQ = idx;
@@ -685,7 +885,7 @@ function closeProfileModal(e) {
 }
 
 function saveProfile() {
-  const name = document.getElementById("inputName").value || "김노드";
+  const userName = document.getElementById("inputName").value || "김노드";
   const school = document.getElementById("inputSchool").value || "서울고등학교";
   const grade = document.getElementById("selectGrade").value;
   const region = document.getElementById("inputRegion").value || "서울";
@@ -693,13 +893,14 @@ function saveProfile() {
   const university = document.getElementById("inputUniversity").value;
   const major = document.getElementById("inputMajor").value;
 
-  const initial = name.charAt(0);
+  const initial = userName.charAt(0);
   document.getElementById("profileInitial").textContent = initial;
-  document.getElementById("profileName").textContent = name;
+  document.getElementById("profileName").textContent = userName;
+  document.getElementById("heroName").textContent = userName;
   document.getElementById("profileGrade").textContent = `고등학교 ${grade}학년`;
 
   document.getElementById("profileCardInitial").textContent = initial;
-  document.getElementById("profileCardName").textContent = name;
+  document.getElementById("profileCardName").textContent = userName;
   document.getElementById("profileCardDetail").textContent =
     `고등학교 ${grade}학년 · ${region}`;
   document.getElementById("profileCardGoal").textContent =

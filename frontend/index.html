@@ -12,7 +12,7 @@
       rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="src/style.css" />
   </head>
   <body>
     <!-- ========== SIDEBAR ========== -->
@@ -58,12 +58,12 @@
         style="cursor: pointer"
       >
         <div class="profile-avatar">
-          <span id="profileInitial">김</span>
+          <span id="profileInitial">?</span>
           <div class="sync-ring"></div>
         </div>
         <div class="profile-info">
-          <p class="profile-name" id="profileName">김노드</p>
-          <p class="profile-grade" id="profileGrade">고등학교 2학년</p>
+          <p class="profile-name" id="profileName">사용자 정보 없음</p>
+          <p class="profile-grade" id="profileGrade">데이터를 동기화해주세요</p>
         </div>
       </div>
 
@@ -178,19 +178,23 @@
         <!-- Hero Section -->
         <div class="hero-section">
           <div class="hero-left">
-            <div class="hero-tag">
-              <span class="tag-pulse"></span>
-              오늘 밤 시뮬레이션 완료
+            <div class="hero-content">
+              <div class="hero-tag" id="statusTag">
+                <span class="tag-pulse" id="statusPulse"></span>
+                <span id="statusText">사용자 데이터를 동기화해주세요</span>
+              </div>
+
+              <div id="heroTitleContainer">
+                <h1 class="hero-title">데이터 없음</h1>
+              </div>
+
+              <p class="hero-sub" id="heroSubText">
+                AI 분신이 오늘 영어 시뮬레이션을 분석합니다. 사용자를 선택하고
+                시뮬레이션을 시작하세요.
+              </p>
             </div>
-            <h1 class="hero-title">
-              김노드 님의 트윈이<br />
-              <span class="hero-accent">3개 오답 위험</span>을 예보했습니다
-            </h1>
-            <p class="hero-sub">
-              AI 분신이 오늘 영어 시뮬레이션을 완료했습니다.<br />지금 바로 위험
-              구간을 확인하고 선제 학습을 시작하세요.
-            </p>
-            <div class="hero-actions">
+
+            <div class="hero-actions" id="heroActions" style="display: none">
               <button class="btn-primary" onclick="switchTab('simulator')">
                 <svg
                   viewBox="0 0 24 24"
@@ -207,18 +211,28 @@
               <button class="btn-secondary">리포트 보기</button>
             </div>
           </div>
+
           <div class="hero-right">
             <div
               class="twin-orb-container"
-              style="position: relative; width: 300px; height: 300px"
+              id="radarWrapper"
+              style="
+                position: relative;
+                width: 300px;
+                height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
             >
               <canvas
                 id="userRadarChart"
-                style="position: absolute; z-index: 1"
+                style="position: absolute; z-index: 1; display: none"
               ></canvas>
 
               <div
                 class="orb-inner"
+                id="syncOrb"
                 style="
                   position: absolute;
                   top: 50%;
@@ -227,263 +241,295 @@
                   z-index: 2;
                   background: rgba(255, 255, 255, 0.1);
                   border: none;
+                  display: none;
                 "
               >
-                <span class="orb-value" id="syncPercent">87</span>
-                <span class="orb-unit">%</span>
+                <span class="orb-value" id="syncPercent">0</span
+                ><span class="orb-unit">%</span>
+              </div>
+
+              <div
+                id="radarMessage"
+                style="
+                  color: rgba(255, 255, 255, 0.4);
+                  font-size: 14px;
+                  text-align: center;
+                  z-index: 3;
+                "
+              >
+                분석 대기 중
               </div>
             </div>
           </div>
         </div>
+        <div id="dashboardDataContainer" style="display: none">
+          <!-- Stats Row -->
+          <div class="stats-row" id="statsRow">
+            <div class="stat-card stat-blue">
+              <div class="stat-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <p class="stat-label">정답 예측 건수</p>
+                <p class="stat-value" id="correctCount"></p>
+                <p class="stat-change positive"></p>
+              </div>
+            </div>
+            <div class="stat-card stat-red">
+              <div class="stat-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <p class="stat-label">오답 위험 건수</p>
+                <p class="stat-value" id="riskCount">-</p>
+                <p class="stat-change negative">주의 필요</p>
+              </div>
+            </div>
+            <div class="stat-card stat-purple">
+              <div class="stat-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <p class="stat-label">오늘 학습 시간</p>
+                <p class="stat-value">
+                  2<span style="font-size: 1rem; font-weight: 500">h 34m</span>
+                </p>
+                <p class="stat-change positive">목표 달성 중</p>
+              </div>
+            </div>
+            <div class="stat-card stat-green">
+              <div class="stat-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+              </div>
+              <div class="stat-body">
+                <p class="stat-label">트윈 싱크율</p>
+                <p class="stat-value">
+                  87<span style="font-size: 1rem; font-weight: 500">%</span>
+                </p>
+                <p class="stat-change positive">+5% 이번 주</p>
+              </div>
+            </div>
+          </div>
 
-        <!-- Stats Row -->
-        <div class="stats-row">
-          <div class="stat-card stat-blue">
-            <div class="stat-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <div class="stat-body">
-              <p class="stat-label">정답 예측 건수</p>
-              <p class="stat-value" id="correctCount">12</p>
-              <p class="stat-change positive">+2 어제 대비</p>
-            </div>
-          </div>
-          <div class="stat-card stat-red">
-            <div class="stat-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </div>
-            <div class="stat-body">
-              <p class="stat-label">오답 위험 건수</p>
-              <p class="stat-value" id="riskCount">3</p>
-              <p class="stat-change negative">주의 필요</p>
-            </div>
-          </div>
-          <div class="stat-card stat-purple">
-            <div class="stat-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </div>
-            <div class="stat-body">
-              <p class="stat-label">오늘 학습 시간</p>
-              <p class="stat-value">
-                2<span style="font-size: 1rem; font-weight: 500">h 34m</span>
-              </p>
-              <p class="stat-change positive">목표 달성 중</p>
-            </div>
-          </div>
-          <div class="stat-card stat-green">
-            <div class="stat-icon">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg>
-            </div>
-            <div class="stat-body">
-              <p class="stat-label">트윈 싱크율</p>
-              <p class="stat-value">
-                87<span style="font-size: 1rem; font-weight: 500">%</span>
-              </p>
-              <p class="stat-change positive">+5% 이번 주</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Twin Sync Bar -->
-        <div class="section-card">
-          <div class="card-header">
-            <h2 class="card-title">트윈 싱크 현황</h2>
-            <span class="card-badge">실시간</span>
-          </div>
-          <div class="sync-bars">
-            <div class="sync-bar-item">
-              <div class="sync-bar-label">
-                <span>영문법 (수 일치/시제)</span>
-                <span class="sync-bar-pct">92%</span>
-              </div>
-              <div class="sync-bar-track">
-                <div
-                  class="sync-bar-fill"
-                  data-width="92"
-                  style="background: #2563eb"
-                ></div>
-              </div>
-            </div>
-            <div class="sync-bar-item">
-              <div class="sync-bar-label">
-                <span>구문 독해 (관계사)</span>
-                <span class="sync-bar-pct">78%</span>
-              </div>
-              <div class="sync-bar-track">
-                <div
-                  class="sync-bar-fill"
-                  data-width="78"
-                  style="background: #7c3aed"
-                ></div>
-              </div>
-            </div>
-            <div class="sync-bar-item">
-              <div class="sync-bar-label">
-                <span>작문</span>
-                <span class="sync-bar-pct">85%</span>
-              </div>
-              <div class="sync-bar-track">
-                <div
-                  class="sync-bar-fill"
-                  data-width="85"
-                  style="background: #059669"
-                ></div>
-              </div>
-            </div>
-            <div class="sync-bar-item">
-              <div class="sync-bar-label">
-                <span>어휘 숙련도</span>
-                <span class="sync-bar-pct">61%</span>
-              </div>
-              <div class="sync-bar-track">
-                <div
-                  class="sync-bar-fill"
-                  data-width="61"
-                  style="background: #d97706"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Risk Alerts -->
-        <div class="two-col-grid">
+          <!-- Twin Sync Bar -->
           <div class="section-card">
             <div class="card-header">
-              <h2 class="card-title">
-                위험 알림 <span class="risk-blink">●</span>
-              </h2>
-              <span class="card-badge badge-red">3건</span>
+              <h2 class="card-title">트윈 싱크 현황</h2>
+              <span class="card-badge">실시간</span>
             </div>
-            <div class="risk-list" id="riskList">
-              <!-- JS로 동적 생성 -->
+            <div class="sync-bars" id="syncBars">
+              <div class="sync-bar-item">
+                <div class="sync-bar-label">
+                  <span>영문법 (수 일치/시제)</span>
+                  <span class="sync-bar-pct">92%</span>
+                </div>
+                <div class="sync-bar-track">
+                  <div
+                    class="sync-bar-fill"
+                    data-width="92"
+                    style="background: #2563eb"
+                  ></div>
+                </div>
+              </div>
+              <div class="sync-bar-item">
+                <div class="sync-bar-label">
+                  <span>구문 독해 (관계사)</span>
+                  <span class="sync-bar-pct">78%</span>
+                </div>
+                <div class="sync-bar-track">
+                  <div
+                    class="sync-bar-fill"
+                    data-width="78"
+                    style="background: #7c3aed"
+                  ></div>
+                </div>
+              </div>
+              <div class="sync-bar-item">
+                <div class="sync-bar-label">
+                  <span>작문</span>
+                  <span class="sync-bar-pct">85%</span>
+                </div>
+                <div class="sync-bar-track">
+                  <div
+                    class="sync-bar-fill"
+                    data-width="85"
+                    style="background: #059669"
+                  ></div>
+                </div>
+              </div>
+              <div class="sync-bar-item">
+                <div class="sync-bar-label">
+                  <span>어휘 숙련도</span>
+                  <span class="sync-bar-pct">61%</span>
+                </div>
+                <div class="sync-bar-track">
+                  <div
+                    class="sync-bar-fill"
+                    data-width="61"
+                    style="background: #d97706"
+                  ></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="section-card">
-            <div class="card-header">
-              <h2 class="card-title">AI 학습 패턴 분석</h2>
+          <!-- Risk Alerts -->
+          <div class="two-col-grid">
+            <div class="section-card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  위험 알림 <span class="risk-blink">●</span>
+                </h2>
+                <span class="card-badge badge-red" id="riskBadgeCount"
+                  >0건</span
+                >
+              </div>
+              <div class="risk-list" id="riskList">
+                <!-- JS로 동적 생성 -->
+              </div>
             </div>
-            <div class="pattern-list">
-              <div class="pattern-item">
-                <div class="pattern-icon pattern-warn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    width="16"
-                    height="16"
-                  >
-                    <path
-                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                    />
-                  </svg>
-                </div>
-                <div class="pattern-body">
-                  <p class="pattern-title">풀이 시간 이상 감지</p>
-                  <p class="pattern-desc">
-                    Q.05 평균 풀이 시간 4분 초과 — 개념 재확인 필요
-                  </p>
-                </div>
+
+            <div class="section-card">
+              <div class="card-header">
+                <h2 class="card-title">AI 학습 패턴 분석</h2>
               </div>
-              <div class="pattern-item">
-                <div class="pattern-icon pattern-info">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    width="16"
-                    height="16"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
+              <div class="pattern-list" id="patternList">
+                <div class="pattern-item">
+                  <div class="pattern-icon pattern-warn">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="pattern-body">
+                    <p class="pattern-title">풀이 시간 이상 감지</p>
+                    <p class="pattern-desc">
+                      Q.05 평균 풀이 시간 4분 초과 — 개념 재확인 필요
+                    </p>
+                  </div>
                 </div>
-                <div class="pattern-body">
-                  <p class="pattern-title">반복 오답 유형 감지</p>
-                  <p class="pattern-desc">
-                    수동태-능동태 전환 문제에서 최근 3회 연속 오답 발생
-                  </p>
+                <div class="pattern-item">
+                  <div class="pattern-icon pattern-info">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  </div>
+                  <div class="pattern-body">
+                    <p class="pattern-title">반복 오답 유형 감지</p>
+                    <p class="pattern-desc">
+                      수동태-능동태 전환 문제에서 최근 3회 연속 오답 발생
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div class="pattern-item">
-                <div class="pattern-icon pattern-ok">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    width="16"
-                    height="16"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+                <div class="pattern-item">
+                  <div class="pattern-icon pattern-ok">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <div class="pattern-body">
+                    <p class="pattern-title">강점 유형 확인</p>
+                    <p class="pattern-desc">여휘 문제에서 높은 정답률</p>
+                  </div>
                 </div>
-                <div class="pattern-body">
-                  <p class="pattern-title">강점 유형 확인</p>
-                  <p class="pattern-desc">여휘 문제에서 높은 정답률</p>
-                </div>
-              </div>
-              <div class="pattern-item">
-                <div class="pattern-icon pattern-warn">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    width="16"
-                    height="16"
-                  >
-                    <path
-                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                    />
-                  </svg>
-                </div>
-                <div class="pattern-body">
-                  <p class="pattern-title">야간 집중도 저하</p>
-                  <p class="pattern-desc">
-                    오후 10시 이후 오답률 23% 상승 — 학습 시간대 조정 권장
-                  </p>
+                <div class="pattern-item">
+                  <div class="pattern-icon pattern-warn">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      width="16"
+                      height="16"
+                    >
+                      <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div class="pattern-body">
+                    <p class="pattern-title">야간 집중도 저하</p>
+                    <p class="pattern-desc">
+                      오후 10시 이후 오답률 23% 상승 — 학습 시간대 조정 권장
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div
+          id="dashboardLoadingOrEmpty"
+          style="
+            text-align: center;
+            padding: 60px 0;
+            color: rgba(255, 255, 255, 0.2);
+          "
+        >
+          <div
+            id="dashboardStatusIcon"
+            style="font-size: 40px; margin-bottom: 15px"
+          >
+            📊
+          </div>
+          <h3 id="dashboardStatusMsg">유저 ID를 입력하고 동기화해주세요</h3>
         </div>
       </section>
 
@@ -992,7 +1038,7 @@
                 id="inputName"
                 class="form-input"
                 placeholder="이름을 입력하세요"
-                value="김노드"
+                value="${profileName}"
               />
             </div>
 

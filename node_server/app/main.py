@@ -21,7 +21,7 @@ def get_user_stats(user_id: str):
     stats_response = supabase.table("user_ai_stats") \
         .select("*") \
         .eq("user_id", user_id) \
-        .maybeSingle() \
+        .maybe_single() \
         .execute()
     
     if not stats_response.data:
@@ -72,3 +72,22 @@ def get_questions():
     # Supabase의 problems 테이블에서 모든 데이터 조회
     response = supabase.table("problems").select("*").execute()
     return response.data
+
+# [추가] 유저 기본 프로필 정보 가져오기
+@app.get("/api/users/{user_id}")
+def get_user_profile(user_id: str):
+    try:
+        # users 테이블에서 id(또는 user_id)가 일치하는 행 조회
+        # 테이블의 실제 ID 컬럼명에 맞춰 .eq("id", user_id) 등으로 수정하세요.
+        response = supabase.table("users") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .maybe_single() \
+            .execute()
+        
+        if not response.data:
+            return {"error": "User profile not found"}
+            
+        return response.data
+    except Exception as e:
+        return {"error": str(e)}
