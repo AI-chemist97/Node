@@ -684,47 +684,101 @@ function initQuiz(idx) {
 }
 
 /* ──────────────────────────────────────────
-   5. 정답 판별 및 실시간 엔진 (수정됨)
+   5. 정답 판별 및 흐름 제어 (수정됨)
 ────────────────────────────────────────── */
-function selectOption(btn, isCorrect, optIdx) {
+async function selectOption(btn, isCorrect, optIdx) {
   const q = QUESTIONS[currentQ];
   const allBtns = document.querySelectorAll(".q-opt-btn");
 
-  // 1. 버튼 즉시 비활성화 및 정답 표시
-  allBtns.forEach((b) => {
-    b.disabled = true;
-    if (b.dataset.correct === "true") b.classList.add("correct");
-  });
+  allBtns.forEach((b) => b.disabled = true);
+  if (b.dataset.correct === "true") b.classList.add("correct");
+  if (!isCorrect) btn.classList.add("wrong");
 
-  // 2. 결과 처리 및 UI 전환
-  if (isCorrect) {
-    answered[currentQ] = "correct";
-    showResultMsg(true, q);
-    appendLog(`[TWIN] ✓ 정답 확인 — 패턴 분석 중...`, "ok");
+  answered[currentQ] = isCorrect ? "correct" : "wrong";
+
+  // 1. 서버 점수 동기화 (기존 로직 유지)
+  const category = q.type.split(" · ")[0];
+  await syncScoreToServer(isCorrect, category);
+
+  // 2. 마지막 문제인지 체크
+  if (currentQ === QUESTIONS.length - 1) {
+    // 모든 문제를 다 풀었을 때: 로딩 후 리포트로 이동
+    showFinalLoadingAndGoToReport();
   } else {
-    answered[currentQ] = "wrong";
-    btn.classList.add("wrong");
-    showResultMsg(false, q);
-    appendLog(`[TWIN] ✗ 오답 감지 — 이상 패턴 기록 시작`, "error");
+    // 다음 문제가 있을 때: 1.5초 후 자동으로 다음 문제 이동 (사용자 편의성)
+    setTimeout(() => {
+      nextQuestion();
+      appendLog(`[SYSTEM] 다음 문항 Q.${QUESTIONS[currentQ].num} 분석 시작`, "info");
+    }, 1500);
   }
+}
 
-  // 3. AI 분석 모드로 카드 전환 (하단 예보 영역)
-  const forecastCard = document.querySelector('.forecast-card');
-  const forecastTitle = document.querySelector('.forecast-title');
-  const forecastText = document.getElementById('forecastText');
-
-  forecastCard.style.border = isCorrect ? "1px solid var(--green)" : "1px solid var(--red)";
-  forecastTitle.textContent = isCorrect ? "AI 습관 분석 (정답)" : "AI 오답 심층 분석";
-  forecastText.innerHTML = `<strong>분석 결과:</strong> ${q.reason}<br><br><strong>추천 솔루션:</strong> ${q.solutions[0]}`;
-
-  // 4. [핵심] 서버 점수 반영 및 실시간 대시보드 업데이트
-  // q.type에서 카테고리(문법, 독해 등) 추출
-  const category = q.type.split(" · ")[0]; 
-  syncScoreToServer(isCorrect, category); 
+/* ──────────────────────────────────────────
+   로딩 애니메이션 후 리포트 이동 (새로 추가)
+────────────────────────────────────────── */
+function showFinalLoadingAndGoToReport() {
+  const simulatorTab = document.getElementById("tab-simulator");
   
-  updateLiveDashboard(); // 로컬 카운트 즉시 반영
-  updateQuickNav();
-  updateStepIndicator();
+  // 1. 시뮬레이터 화면을 로딩 상태로 변경
+  simulatorTab.innerHTML = `
+    <div class="placeholder-section">
+      <div class="spinner spinner-lg"></div>
+      <h2 style="margin-top: 20px;">AI 트윈이 학습 결과를 분석 중입니다...</h2>
+      <p>패턴 데이터베이스 동기화 및 취약 구간 리포트를 생성하고 있습니다.</p>
+    </div>
+  `;
+
+  appendLog(`[PROCESS] 전 세션 학습 데이터 통합 분석 중...`, "twin");
+  appendLog(`[PROCESS] 맞춤형 교육 솔루션 생성 완료 ▋`, "ok");
+
+  // 2. 3초 뒤에 리포트 탭으로 강제 이동
+  setTimeout(() => {
+    switchTab('report');
+    renderFinalReport(); // 리포트 내용 렌더링 함수 호출
+  }, 3000);
+}
+
+function renderFinalReport() {
+  const reportTab = document.getElementById("tab-report");
+  const correctCount = answered.filter(a => a === "correct").length;
+  const total = QUESTIONS.length;
+  const score = Math.round((correctCount / total) * 100);
+
+  reportTab.innerHTML = `
+    <div class="settings-container">
+      <div class="hero-section" style="background: linear-gradient(135deg, var(--blue-dark), var(--purple));">
+        <div class="hero-left">
+          <h1 class="hero-title">시뮬레이션 분석 완료</h1>
+          <p class="hero-sub">학습자님의 트윈이 분석한 오늘의 최종 성적표입니다.</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="location.reload()">다시 도전하기</button>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="orb-inner" style="width: 120px; height: 120px;">
+            <span class="orb-label">SCORE</span>
+            <span class="orb-value">${score}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <div class="section-card">
+          <div class="card-header"><h2 class="card-title">정답률 상세</h2></div>
+          <div style="font-size: 40px; font-weight: 800; text-align: center; padding: 20px; color: var(--blue);">
+            ${correctCount} <span style="font-size: 20px; color: var(--text-sub);">/ ${total}</span>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="card-header"><h2 class="card-title">AI 집중 권고 사항</h2></div>
+          <ul class="modal-solution" style="list-style: none; padding: 0;">
+            ${score < 100 ? '<li>⚠️ 오답 문항의 패턴 분석 결과, 특정 유형의 반복 실수가 감지되었습니다.</li>' : '<li>✅ 모든 유형에서 완벽한 숙련도를 보이고 있습니다.</li>'}
+            <li>취약 영역 점수 동기화가 서버에 완료되었습니다.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
 }
 /* ──────────────────────────────────────────
    실시간 점수 서버 반영 로직 (PATCH)
@@ -1107,7 +1161,38 @@ window.saveProfile = async () => {
     alert("정보를 저장하는 중 서버 에러가 발생했습니다.");
   }
 };
+// 회원가입/로그인 UI 전환
+window.toggleAuthMode = (isSignup) => {
+  document.getElementById("loginFields").style.display = isSignup ? "none" : "block";
+  document.getElementById("signupFields").style.display = isSignup ? "block" : "none";
+  document.getElementById("authTitle").textContent = isSignup ? "트윈 만들기" : "환영합니다!";
+  document.getElementById("authSub").textContent = isSignup ? "기초 정보를 입력하고 AI 분석을 시작하세요." : "AI 디지털 트윈 학습을 위해 로그인하세요.";
+};
 
+// 회원가입 처리
+window.handleSignup = async () => {
+  const id = document.getElementById("signupId").value.trim();
+  const name = document.getElementById("signupName").value.trim();
+
+  if(!id || !name) return alert("모든 항목을 입력해주세요.");
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: id, name: name })
+    });
+    
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    alert("회원가입이 완료되었습니다! 생성된 ID로 로그인해주세요.");
+    toggleAuthMode(false); // 로그인 모드로 전환
+    document.getElementById("userInputId").value = id;
+  } catch (err) {
+    alert("이미 존재하는 ID이거나 오류가 발생했습니다.");
+  }
+};
 function updateSyncRing() {
   const syncRing = document.querySelector(".sync-ring");
   if (syncRing) {

@@ -27,6 +27,41 @@ class ProfileUpdate(BaseModel):
     target_university: str = None
     target_major: str = None
 
+# app/main.py에 추가
+class SignupRequest(BaseModel):
+    user_id: str
+    name: str
+    school_name: str = "미지정 학교"
+
+@app.post("/api/signup")
+def signup_user(data: SignupRequest):
+    try:
+        # 1. users 테이블에 유저 생성
+        user_res = supabase.table("users").insert({
+            "user_id": data.user_id,
+            "name": data.name,
+            "school_name": data.school_name,
+            "grade": "고등학교 1학년", # 기본값
+            "region": "서울"
+        }).execute()
+
+        # 2. user_ai_stats 테이블에 초기 점수(0.5) 세팅
+        stats_res = supabase.table("user_ai_stats").insert({
+            "user_id": data.user_id,
+            "grammar_score": 0.5,
+            "reading_score": 0.5,
+            "vocabulary_score": 0.5,
+            "structure_score": 0.5,
+            "logic_score": 0.5,
+            "predicted_score": 0.5,
+            "total_solved": 0
+        }).execute()
+
+        return {"status": "success", "user": user_res.data}
+    except Exception as e:
+        return {"error": str(e)}
+    
+    
 @app.patch("/api/user-stats/{user_id}")
 def update_user_scores(user_id: str, data: ScoreUpdate):
     try:
