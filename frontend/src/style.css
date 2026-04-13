@@ -55,6 +55,18 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* 가로 스크롤 절대 금지 */
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: none; /* 아이폰에서 글자 제멋대로 커지는 것 방지 */
+}
+
+/* 모든 박스 모델이 너비 계산에 패딩을 포함하도록 설정 */
+* {
+  box-sizing: border-box;
+}
 
 /* ============ SCROLLBAR ============ */
 ::-webkit-scrollbar {
@@ -2266,6 +2278,12 @@ body {
   .profile-info {
     display: none !important; 
   }
+  .sidebar-profile {
+    display: none !important; 
+  }
+ .sidebar-footer {
+    display: none !important; 
+  }
   .sidebar {
     display: none !important; 
   }
@@ -2280,6 +2298,7 @@ body {
     width: 100vw !important;
     position: relative !important;
     left: 0 !important;
+    overflow-x: hidden;
   }
 
   /* 4. 상단바(Topbar)도 왼쪽 여백이 있다면 제거 */
@@ -2292,7 +2311,12 @@ body {
 
   /* 5. 히어로 섹션 카드 너비 최적화 */
   .hero-section {
-    margin: 10px !important;
-    width: calc(100% - 20px) !important;
+width: calc(100% - 20px) !important; /* 양옆 10px씩만 여백 */
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+  }
+  /* 차트나 큰 요소들이 가로를 터뜨리지 않게 */
+  canvas, svg, img {
+    max-width: 100% !important;
   }
 }
