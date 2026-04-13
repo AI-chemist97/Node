@@ -2,8 +2,36 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>TWIN EDU — AI 디지털 트윈 학습 플랫폼</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ai-chemist97.github.io/Node/" />
+    <meta property="og:title" content="TWIN EDU — AI 디지털 트윈 학습 플랫폼" />
+    <meta
+      property="og:description"
+      content="AI 분신이 분석하는 나만의 맞춤형 학습 시뮬레이션"
+    />
+    <meta
+      property="og:image"
+      content="https://raw.githubusercontent.com/AI-chemist97/Node/main/frontend/src/assets/og-image.png"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="TWIN EDU — AI 디지털 트윈 학습 플랫폼"
+    />
+    <meta
+      name="twitter:description"
+      content="AI 분신이 분석하는 나만의 맞춤형 학습 시뮬레이션"
+    />
+    <meta
+      name="twitter:image"
+      content="https://raw.githubusercontent.com/AI-chemist97/Node/main/frontend/src/assets/og-image.png"
+    />
     <link rel="icon" type="image/png" href="/favicon.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,41 +49,147 @@
         <span class="logo-icon">⬡</span>
         <span class="logo-text">TWIN<span class="logo-accent">EDU</span></span>
       </div>
-      <div id="logoutBtnWrap" style="padding: 0 20px 10px; display: none;">
-    <button onclick="logout()" class="btn-logout" style="width:100%; padding:8px; background:#f85149; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">
-      로그아웃
-    </button>
-  </div>
-
-
-<div id="loginOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-<div id="loginBox" style="background: #ffffff; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center;">
-    <h2 id="authTitle">환영합니다!</h2>
-    <p id="authSub">AI 디지털 트윈 학습을 위해 로그인하세요.</p>
-    
-    <div id="loginFields">
-      <div style="text-align: left; margin-bottom: 16px;">
-        <label>유저 ID</label>
-        <input type="text" id="userInputId" placeholder="유저 ID를 입력하세요" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div id="logoutBtnWrap" style="padding: 0 20px 10px; display: none">
+        <button
+          onclick="logout()"
+          class="btn-logout"
+          style="
+            width: 100%;
+            padding: 8px;
+            background: #f85149;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+          "
+        >
+          로그아웃
+        </button>
       </div>
-      <button onclick="login()" style="width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; margin-bottom: 10px;">시작하기</button>
-      <p style="font-size: 12px; color: #64748b;">처음이신가요? <a href="#" onclick="toggleAuthMode(true)" style="color: #2563eb; font-weight: 600;">회원가입</a></p>
-    </div>
 
-    <div id="signupFields" style="display: none;">
-      <div style="text-align: left; margin-bottom: 12px;">
-        <label>사용할 ID</label>
-        <input type="text" id="signupId" placeholder="예: student01" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div
+        id="loginOverlay"
+        style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(15, 23, 42, 0.9);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(8px);
+        "
+      >
+        <div
+          id="loginBox"
+          style="
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+          "
+        >
+          <h2 id="authTitle">환영합니다!</h2>
+          <p id="authSub">AI 디지털 트윈 학습을 위해 로그인하세요.</p>
+
+          <div id="loginFields">
+            <div style="text-align: left; margin-bottom: 16px">
+              <label>유저 ID</label>
+              <input
+                type="text"
+                id="userInputId"
+                placeholder="유저 ID를 입력하세요"
+                style="
+                  width: 100%;
+                  padding: 12px;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                "
+              />
+            </div>
+            <button
+              onclick="login()"
+              style="
+                width: 100%;
+                padding: 14px;
+                background: #2563eb;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                margin-bottom: 10px;
+              "
+            >
+              시작하기
+            </button>
+            <p style="font-size: 12px; color: #64748b">
+              처음이신가요?
+              <a
+                href="#"
+                onclick="toggleAuthMode(true)"
+                style="color: #2563eb; font-weight: 600"
+                >회원가입</a
+              >
+            </p>
+          </div>
+
+          <div id="signupFields" style="display: none">
+            <div style="text-align: left; margin-bottom: 12px">
+              <label>사용할 ID</label>
+              <input
+                type="text"
+                id="signupId"
+                placeholder="예: student01"
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                "
+              />
+            </div>
+            <div style="text-align: left; margin-bottom: 12px">
+              <label>이름</label>
+              <input
+                type="text"
+                id="signupName"
+                placeholder="실명을 입력하세요"
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 8px;
+                "
+              />
+            </div>
+            <button
+              onclick="handleSignup()"
+              style="
+                width: 100%;
+                padding: 14px;
+                background: #059669;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                margin-bottom: 10px;
+              "
+            >
+              가입 및 트윈 생성
+            </button>
+            <p style="font-size: 12px; color: #64748b">
+              <a href="#" onclick="toggleAuthMode(false)" style="color: #64748b"
+                >이미 계정이 있습니다</a
+              >
+            </p>
+          </div>
+        </div>
       </div>
-      <div style="text-align: left; margin-bottom: 12px;">
-        <label>이름</label>
-        <input type="text" id="signupName" placeholder="실명을 입력하세요" style="width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
-      </div>
-      <button onclick="handleSignup()" style="width: 100%; padding: 14px; background: #059669; color: white; border: none; border-radius: 8px; margin-bottom: 10px;">가입 및 트윈 생성</button>
-      <p style="font-size: 12px; color: #64748b;"><a href="#" onclick="toggleAuthMode(false)" style="color: #64748b;">이미 계정이 있습니다</a></p>
-    </div>
-  </div>
-</div>
       <div class="sidebar-auth-area" style="padding: 10px 20px">
         <input
           type="text"
@@ -1086,42 +1220,43 @@
               />
             </div>
 
-<div class="form-row">
-  <div class="form-group" style="flex: 1">
-    <label class="form-label">학년</label>
-    <select id="selectGrade" class="form-input">
-      <option value="1">1학년</option>
-      <option value="2" selected>2학년</option>
-      <option value="3">3학년</option>
-    </select>
-  </div>
-<div class="form-group" style="flex: 1">
-    <label class="form-label">지역</label>
-    <select id="inputRegion" class="form-input">
-      <option value="서울">서울</option>
-      <option value="경기">경기</option>
-      <option value="인천">인천</option>
-      <option value="대전">대전</option>
-      <option value="대구">대구</option>
-      <option value="부산">부산</option>
-      <option value="광주">광주</option>
-      <option value="울산">울산</option>
-      <option value="세종">세종</option>
-    </select>
-  </div>
-</div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1">
+                <label class="form-label">학년</label>
+                <select id="selectGrade" class="form-input">
+                  <option value="1">1학년</option>
+                  <option value="2" selected>2학년</option>
+                  <option value="3">3학년</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1">
+                <label class="form-label">지역</label>
+                <select id="inputRegion" class="form-input">
+                  <option value="서울">서울</option>
+                  <option value="경기">경기</option>
+                  <option value="인천">인천</option>
+                  <option value="대전">대전</option>
+                  <option value="대구">대구</option>
+                  <option value="부산">부산</option>
+                  <option value="광주">광주</option>
+                  <option value="울산">울산</option>
+                  <option value="세종">세종</option>
+                </select>
+              </div>
+            </div>
 
-<div class="form-group">
-  <label class="form-label">이메일 (변경 불가)</label>
-  <input
-    type="email"
-    id="inputEmail"
-    class="form-input"
-    style="background-color: #f3f4f6; cursor: not-allowed;" 
-    placeholder="이메일"
-    value="kimnode@school.kr"
-    readonly 
-  /> </div>
+            <div class="form-group">
+              <label class="form-label">이메일 (변경 불가)</label>
+              <input
+                type="email"
+                id="inputEmail"
+                class="form-input"
+                style="background-color: #f3f4f6; cursor: not-allowed"
+                placeholder="이메일"
+                value="kimnode@school.kr"
+                readonly
+              />
+            </div>
 
             <div class="form-group">
               <label class="form-label">목표 대학</label>
