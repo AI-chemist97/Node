@@ -16,120 +16,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 window.supabase = supabase;
 window.Chart = Chart;
-/* ──────────────────────────────────────────
-   1. 문제 데이터 (영문법/독해 유형 5문항)
-────────────────────────────────────────── */
-// const QUESTIONS = [
-//   {
-//     num: "01",
-//     title: "다음 문장에서 밑줄 어법상 틀린 것을 고르시오.",
-//     formula:
-//       "The number of students who is attending the seminar has increased.",
-//     type: "영문법 · 주어-동사 수 일치",
-//     opts: [
-//       ["who", false],
-//       ["is", true],
-//       ["attending", false],
-//       ["has", false],
-//       ["increased", false],
-//     ],
-//     risk: 65,
-//     reason:
-//       "The number of 뒤의 관계절 내 동사 수 일치 오류입니다. 선행사가 복수명사(students)임을 인식하지 못하는 패턴이 감지됩니다.",
-//     solutions: [
-//       "The number of(단수) vs A number of(복수) 구별법 숙지",
-//       "관계대명사절 내의 동사는 선행사에 수 일치함을 복습",
-//       "복수 명사 뒤에 오는 단수 동사 함정 문제 주의",
-//     ],
-//   },
-//   {
-//     num: "02",
-//     title: "빈칸에 들어갈 가장 적절한 관계대명사를 고르시오.",
-//     formula:
-//       "The manager rejected the proposal _________ contents were not clearly defined.",
-//     type: "영문법 · 관계대명사",
-//     opts: [
-//       ["which", false],
-//       ["who", false],
-//       ["whose", true],
-//       ["that", false],
-//       ["whom", false],
-//     ],
-//     risk: 78,
-//     reason:
-//       "소유격 관계대명사의 쓰임에 대한 이해도가 낮습니다. 명사(contents)와의 소유 관계를 파악하지 못하고 목적격으로 오해하는 경향이 있습니다.",
-//     solutions: [
-//       "관계대명사 뒤에 완전한 명사구가 올 때 소유격(whose) 검토",
-//       "선행사 '의' 명사로 해석되는지 연결 연습",
-//       "격에 따른 관계대명사 선택 매트릭스 암기",
-//     ],
-//   },
-//   {
-//     num: "03",
-//     title: "다음 문장에서 어법이 올바르지 않은 것을 고르시오.",
-//     formula: "Keep the door locking when you leave the office for the day.",
-//     type: "영문법 · 분사 (능동 vs 수동)",
-//     opts: [
-//       ["Keep", false],
-//       ["locking", true],
-//       ["when", false],
-//       ["leave", false],
-//       ["for the day", false],
-//     ],
-//     risk: 82,
-//     reason:
-//       "목적어(door)와 목적격 보어(locking)의 수동 관계를 능동으로 혼동하고 있습니다. 사물 목적어의 수동 패턴에서 취약점이 확인됩니다.",
-//     solutions: [
-//       "5형식 동사(Keep, Leave) + 목적어 + p.p. 형태 집중 훈련",
-//       "문장의 대상이 동작을 하는지(ing), 당하는지(ed) 판단 연습",
-//       "주요 빈출 타동사의 과거분사형 암기",
-//     ],
-//   },
-//   {
-//     num: "04",
-//     title: "다음 문장의 빈칸에 알맞은 형태를 고르시오.",
-//     formula:
-//       "Not only the students but also the teacher _________ excited about the field trip.",
-//     type: "영문법 · 상관접속사 수 일치",
-//     opts: [
-//       ["are", false],
-//       ["is", true],
-//       ["being", false],
-//       ["have", false],
-//       ["to be", false],
-//     ],
-//     risk: 55,
-//     reason:
-//       "상관접속사 Not only A but also B 구문에서 B에 동사를 일치시키는 원칙을 혼동하여 전체를 복수로 취급하는 오류가 빈번합니다.",
-//     solutions: [
-//       "상관접속사 주어 일치 원칙(가까운 주어 B에 일치) 정리",
-//       "Either A or B, Neither A nor B 구문과 함께 비교 학습",
-//       "단수 주어(the teacher)에 따른 동사 형태 재확인",
-//     ],
-//   },
-//   {
-//     num: "05",
-//     title: "문맥상 단어의 쓰임이 적절하지 않은 것을 고르시오.",
-//     formula:
-//       "The artificial intelligence system was designed to enhance efficiency and minimizing human error.",
-//     type: "영문법 · 병렬 구조",
-//     opts: [
-//       ["artificial", false],
-//       ["designed", false],
-//       ["enhance", false],
-//       ["efficiency", false],
-//       ["minimizing", true],
-//     ],
-//     risk: 89,
-//     reason:
-//       "to부정사에 연결되는 동사원형의 병렬 구조를 파악하지 못하고 있습니다. and 뒤의 형태를 앞의 분사(designed)와 혼동하는 패턴입니다.",
-//     solutions: [
-//       "등위접속사(and, or) 앞뒤의 문법적 형태 일치 연습",
-//       "to (enhance) and (minimize) 구조 분석",
-//       "긴 문장에서의 병렬 구조 찾기 구문 독해 병행",
-//     ],
-//   },
-// ];
 
 let QUESTIONS = []; // 하드코딩된 배열 삭제 후 빈 배열로 초기화
 /* ──────────────────────────────────────────
@@ -980,7 +866,7 @@ window.saveProfile = async () => {
     : `고등학교 ${rawGrade}학년`;
   // 1. 폼 데이터 수집
   const profileData = {
-    user_name: document.getElementById("inputName").value || "김노드",
+    name: document.getElementById("inputName").value || "김노드",
     school_name: schoolName,
     grade: formattedGrade, // 가공된 학년 데이터 삽입
     region: document.getElementById("inputRegion").value,
