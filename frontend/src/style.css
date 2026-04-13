@@ -2263,6 +2263,9 @@ body {
   .sidebar-nav {
     display: none !important; 
   }
+  .profile-info {
+    display: none !important; 
+  }
   .sidebar {
     display: none !important; 
   }
