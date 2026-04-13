@@ -82,23 +82,29 @@ function updateUIByLoginStatus() {
   const loginOverlay = document.getElementById("loginOverlay");
   const mainContent = document.querySelector(".main-content");
   const sidebarNav = document.querySelector(".sidebar-nav");
-  const sidebarProfile = document.querySelector(".sidebar-profile");
   const logoutBtnWrap = document.getElementById("logoutBtnWrap");
 
   if (isLoggedIn) {
+    // 1. 로그인 성공 상태
+    document.body.classList.add("logged-in"); // body에 클래스 추가
     loginOverlay.style.display = "none";
     mainContent.style.opacity = "1";
     mainContent.style.pointerEvents = "auto";
     sidebarNav.style.display = "block";
-    sidebarProfile.style.display = "flex";
-    logoutBtnWrap.style.display = "block";
+    if(logoutBtnWrap) logoutBtnWrap.style.display = "block";
+    
+    // 모바일 전용: 로그인 성공하면 상단 입력창 구역을 아예 날려버림 (선택사항)
+    const authArea = document.querySelector(".sidebar-auth-area");
+    if(authArea) authArea.style.display = "none";
+
   } else {
+    // 2. 로그아웃 상태
+    document.body.classList.remove("logged-in"); // 클래스 제거
     loginOverlay.style.display = "flex";
-    mainContent.style.opacity = "0.1"; // 살짝 보이게 하거나 아예 none 처리
+    mainContent.style.opacity = "0.1";
     mainContent.style.pointerEvents = "none";
     sidebarNav.style.display = "none";
-    sidebarProfile.style.display = "none";
-    logoutBtnWrap.style.display = "none";
+    if(logoutBtnWrap) logoutBtnWrap.style.display = "none";
   }
 }
 
