@@ -13,6 +13,12 @@ app.add_middleware(
 )
 
 # app/main.py
+class ScoreUpdate(BaseModel):
+    field: str      # grammar_score, reading_score 등
+    is_correct: bool
+    inc_value: float = 0.05  # 기본 가중치
+
+
 class ProfileUpdate(BaseModel):
     name: str = None
     school_name: str = None
@@ -21,6 +27,39 @@ class ProfileUpdate(BaseModel):
     target_university: str = None
     target_major: str = None
 
+@app.patch("/api/user-stats/{user_id}")
+def update_user_scores(user_id: str, data: ScoreUpdate):
+    try:
+        # 1. 현재 유저의 최신 점수 정보를 먼저 가져옵니다.
+        current_stats = supabase.table("user_ai_stats") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .maybe_single() \
+            .execute()
+
+        if not current_stats.data:
+            return {"error": "User stats not found"}
+
+        # 2. 기존 점수 계산 및 갱신
+        # 정답이면 증가, 오답이면 감소 (0.0 ~ 1.0 사이 유지)
+        current_val = current_stats.data.get(data.field, 0.0)
+        
+        if data.is_correct:
+            new_val = min(1.0, current_val + data.inc_value)
+        else:
+            # 오답 시 감점 (예: 0.02 차감)
+            new_val = max(0.0, current_val - 0.02)
+
+        # 3. DB 업데이트 실행
+        response = supabase.table("user_ai_stats") \
+            .update({data.field: new_val}) \
+            .eq("user_id", user_id) \
+            .execute()
+
+        return response.data
+    except Exception as e:
+        return {"error": str(e)}
+    
 @app.patch("/api/users/{user_id}")
 def update_user_profile(user_id: str, profile: ProfileUpdate):
     try:

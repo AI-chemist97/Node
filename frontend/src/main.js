@@ -684,56 +684,88 @@ function initQuiz(idx) {
 }
 
 /* ──────────────────────────────────────────
-   5. 정답 판별 (selectOption)
+   5. 정답 판별 및 실시간 엔진 (수정됨)
 ────────────────────────────────────────── */
 function selectOption(btn, isCorrect, optIdx) {
   const q = QUESTIONS[currentQ];
   const allBtns = document.querySelectorAll(".q-opt-btn");
 
-  // 1. 버튼 비활성화 및 정답 표시
+  // 1. 버튼 즉시 비활성화 및 정답 표시
   allBtns.forEach((b) => {
     b.disabled = true;
     if (b.dataset.correct === "true") b.classList.add("correct");
   });
 
-  // 2. 결과 처리 및 실시간 업데이트 로직 시작
+  // 2. 결과 처리 및 UI 전환
   if (isCorrect) {
     answered[currentQ] = "correct";
     showResultMsg(true, q);
-    // 1. 하단 예보 카드의 텍스트와 디자인을 '분석 모드'로 변경
-  const forecastCard = document.querySelector('.forecast-card');
-  const forecastTitle = document.querySelector('.forecast-title');
-  const forecastText = document.getElementById('forecastText');
-  const q = QUESTIONS[currentQ];
-
-  forecastCard.style.border = isCorrect ? "1px solid var(--green)" : "1px solid var(--red)";
-  forecastTitle.textContent = isCorrect ? "AI 습관 분석 (정답)" : "AI 오답 심층 분석";
-  
-  // 분석 내용 주입
-  forecastText.innerHTML = `<strong>분석 결과:</strong> ${q.reason}<br><br><strong>추천 솔루션:</strong> ${q.solutions[0]}`;
-
-  // 2. 터미널 로그에도 분석 결과 한 줄 출력
-  appendLog(`[ANAL] 분석 엔진이 ${isCorrect ? '성공' : '실패'} 패턴을 데이터베이스에 기록했습니다.`, "twin");
-    // 실시간 분석 로그 출력
     appendLog(`[TWIN] ✓ 정답 확인 — 패턴 분석 중...`, "ok");
-    appendLog(`[ANAL] 학습자 '${document.getElementById("profileName").textContent}'의 취약점 보완 완료`, "info");
   } else {
     answered[currentQ] = "wrong";
     btn.classList.add("wrong");
     showResultMsg(false, q);
-    
-    // 오답 시 분석 로그 출력
-    appendLog(`[TWIN] ✗ 오답 감지 — 이상 패턴 분석 시작`, "error");
-    appendLog(`[SCAN] 위험도 ${q.risk}% 구간에서의 실수 패턴 기록됨`, "warn");
+    appendLog(`[TWIN] ✗ 오답 감지 — 이상 패턴 기록 시작`, "error");
   }
 
-  // 3. 대시보드 실시간 업데이트 트리거
-  updateLiveDashboard();
+  // 3. AI 분석 모드로 카드 전환 (하단 예보 영역)
+  const forecastCard = document.querySelector('.forecast-card');
+  const forecastTitle = document.querySelector('.forecast-title');
+  const forecastText = document.getElementById('forecastText');
+
+  forecastCard.style.border = isCorrect ? "1px solid var(--green)" : "1px solid var(--red)";
+  forecastTitle.textContent = isCorrect ? "AI 습관 분석 (정답)" : "AI 오답 심층 분석";
+  forecastText.innerHTML = `<strong>분석 결과:</strong> ${q.reason}<br><br><strong>추천 솔루션:</strong> ${q.solutions[0]}`;
+
+  // 4. [핵심] 서버 점수 반영 및 실시간 대시보드 업데이트
+  // q.type에서 카테고리(문법, 독해 등) 추출
+  const category = q.type.split(" · ")[0]; 
+  syncScoreToServer(isCorrect, category); 
   
+  updateLiveDashboard(); // 로컬 카운트 즉시 반영
   updateQuickNav();
   updateStepIndicator();
 }
+/* ──────────────────────────────────────────
+   실시간 점수 서버 반영 로직 (PATCH)
+────────────────────────────────────────── */
+async function syncScoreToServer(isCorrect, category) {
+  const userId = document.getElementById("userInputId")?.value.trim() || "115";
+  
+  // 5개 카테고리 컬럼명 매핑
+  const fieldMap = {
+    "문법": "grammar_score",
+    "독해": "reading_score",
+    "어휘": "vocabulary_score",
+    "구조": "structure_score",
+    "논리": "logic_score"
+  };
 
+  const columnName = fieldMap[category] || "grammar_score";
+
+  try {
+    appendLog(`[SYNC] ${category} 영역 분석 데이터 서버 전송...`, "info");
+
+    const response = await fetch(`${API_BASE_URL}/api/user-stats/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        field: columnName,
+        is_correct: isCorrect,
+        inc_value: isCorrect ? 0.05 : -0.02 // 정답 시 +5%, 오답 시 -2%
+      }),
+    });
+
+    if (response.ok) {
+      appendLog(`[SUCCESS] AI 트윈 데이터 동기화 완료`, "ok");
+      // 데이터가 바뀌었으므로 대시보드(차트 등)를 비동기로 다시 그림
+      await updateAIVisualization(userId); 
+    }
+  } catch (err) {
+    console.error("Score Sync Error:", err);
+    appendLog(`[ERROR] 데이터 동기화 실패`, "error");
+  }
+}
 /* ──────────────────────────────────────────
    실시간 데이터 업데이트 로직 (새로 추가)
 ────────────────────────────────────────── */
