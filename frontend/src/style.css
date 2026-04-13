@@ -2258,16 +2258,17 @@ body {
 }
 /* ============ MOBILE OPTIMIZATION (768px 이하) ============ */
 /* ============ MOBILE OPTIMIZATION (768px 이하) ============ */
+/* ============ MOBILE OPTIMIZATION (768px 이하) ============ */
 @media (max-width: 768px) {
   :root {
-    --sidebar-w: 0px;
+    --sidebar-w: 0px; /* 사이드바 폭을 0으로 고정 */
   }
 
-  /* 1. 사이드바는 하단 메뉴로 활용 */
+  /* 1. 사이드바는 하단 메뉴만 남기고 나머지는 물리적으로 제거 */
   .sidebar {
     display: flex !important;
-    width: 100%;
-    height: 60px;
+    width: 100% !important;
+    height: 65px !important;
     min-height: auto;
     position: fixed;
     top: auto;
@@ -2275,54 +2276,54 @@ body {
     left: 0;
     padding: 0;
     flex-direction: row;
+    border-right: none;
     border-top: 1px solid var(--border);
+    background: white;
     z-index: 1000;
   }
 
-  /* 2. 하단 메뉴에서 불필요한 요소 숨김 (입력창 클래스는 제외됨) */
-  .sidebar-logo, .sidebar-profile, .nav-section-label, .sidebar-footer, #logoutBtnWrap {
+  /* 2. [핵심] 사이드바 내부의 모든 요소를 숨기고 네비게이션만 남김 */
+  .sidebar-logo, 
+  .sidebar-profile, 
+  .nav-section-label, 
+  .sidebar-footer, 
+  #logoutBtnWrap, 
+  .sidebar-auth-area { /* 입력창 구역도 로그인 후엔 숨겨야 함 */
     display: none !important;
   }
 
-  /* 3. [핵심] 로그인 ID 입력칸을 상단에 고정 */
-.sidebar-auth-area {
-    display: block !important;
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0;
+  /* 3. [핵심] 메인 콘텐츠를 왼쪽 끝으로 밀착 */
+  .main-content {
+    margin-left: 0 !important; /* 왼쪽 여백 삭제 */
     width: 100%;
-    background: white;
-    z-index: 900;
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px !important;
+    padding: 10px; /* 모바일용 최소 여백 */
+    padding-bottom: 80px; /* 하단바에 가리지 않게 여백 */
   }
-  /* [추가] 로그인 성공 시 입력창 숨기기 */
-  body.logged-in .sidebar-auth-area {
-    display: none !important;
+
+  /* 4. 상단바 가독성 조정 */
+  .topbar {
+    padding: 0 10px;
+    justify-content: center; /* 탭 버튼이 중앙에 오도록 */
   }
   
-  /* [추가] 로그인 성공 시 메인 콘텐츠 여백 원복 */
-  body.logged-in .main-content {
-    padding-top: 0; 
-  }
-  /* 4. 메인 컨텐츠 여백 확보 (입력창 높이만큼 더 띄움) */
-  .main-content {
-    margin-left: 0;
-    padding-top: 60px; /* 상단 입력창 공간 */
-    padding-bottom: 70px; /* 하단 메뉴 공간 */
+  .topbar-tabs {
+    gap: 2px;
   }
 
-  .sidebar-nav {
-    display: flex;
-    width: 100%;
-    justify-content: space-around;
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 
-  .nav-item {
-    flex-direction: column;
-    font-size: 10px;
-    padding: 8px 0;
-    flex: 1;
-    align-items: center;
+  /* 5. 히어로 섹션 텍스트 줄바꿈 방지 및 중앙 정렬 */
+  .hero-section {
+    padding: 30px 15px;
+    text-align: center;
+    border-radius: var(--radius);
+  }
+
+  .hero-title {
+    font-size: 22px;
+    word-break: keep-all; /* 단어 단위로 줄바꿈해서 가독성 향상 */
   }
 }
