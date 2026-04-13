@@ -4,7 +4,7 @@ from app.database import supabase
 from pydantic import BaseModel
 from dotenv import load_dotenv
 app = FastAPI(title="Twin Edu API")
-import google as genai
+import google.genai as genai
 import os
 
 load_dotenv()
