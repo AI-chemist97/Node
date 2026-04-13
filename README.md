@@ -21,7 +21,7 @@
 * **Implementation**: 유저 번호를 입력하면 서버를 통해 DB에 저장된 과거 풀이 로그와 소요 시간 데이터를 즉각 호출합니다. 
 
 ### 2. Gemini-Powered Error Forecasting (오답 사전 예보)
-* **Mechanism**: Gemini 1.5 Pro의 대규모 컨텍스트를 활용하여 누적 데이터를 분석하고, 새로운 문항에 대한 **오답 선택 확률(%)**을 산출합니다. 
+* **Mechanism**: Gemini 1.5 Pro의 대규모 컨텍스트를 활용하여 누적 데이터를 분석하고, 새로운 문항에 대한 **오답 선택 확률(%)을 산출**합니다. 
 ***Simulation**: 학습자가 빠지기 쉬운 논리적 함정(인과관계 왜곡 등)을 사전에 경고하여 실전 실수를 방지합니다. 
 
 ---
@@ -43,9 +43,9 @@
 
 | Role | Name | Technical Contribution |
 | :--- | :---: | :--- |
-| **Lead Developer** | **남윤희** | **Full-stack Development.** 61억 건 데이터 처리 경력을 바탕으로 서버-DB 아키텍처 구현 및 AI 엔진 개발 전담. [cite: 1, 2, 18, 30] |
-| **UIUX & Planning** | **이유민** | **Service Logic Design.** 사용자 인지 과정을 고려한 인터페이스 설계 및 공모전 리포트 총괄 작성. [cite: 23, 30] |
-| **Tech Consultant** | **김민제** | **Reliability Advisor.** 프로젝트 아키텍처 타당성 검토 및 기술적 로드맵 지원. [cite: 28] |
+| **Lead Developer** | **남윤희** | **Full-stack Development.** 61억 건 데이터 처리 경력을 바탕으로 서버-DB 아키텍처 구현 및 AI 엔진 개발 전담. |
+| **UIUX & Planning** | **이유민** | **Service Logic Design.** 사용자 인지 과정을 고려한 인터페이스 설계 및 공모전 리포트 총괄 작성.  |
+| **Tech Consultant** | **김민제** | **Reliability Advisor.** 프로젝트 아키텍처 타당성 검토 및 기술적 로드맵 지원.  |
 
 ---
 
