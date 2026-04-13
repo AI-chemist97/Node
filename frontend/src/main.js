@@ -13,14 +13,79 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+window.login = login;
+window.logout = logout;
 window.supabase = supabase;
 window.Chart = Chart;
-
+let isLoggedIn = false; // 로그인 상태 관리
 let QUESTIONS = []; // 하드코딩된 배열 삭제 후 빈 배열로 초기화
 /* ──────────────────────────────────────────
    1.5. 서버 연결 설정 (추가됨)
 ────────────────────────────────────────── */
+// 로그인 함수 (ID 입력 기반)
+async function login() {
+  const userId = document.getElementById("userInputId").value.trim();
+  if (!userId) {
+    alert("유저 ID를 입력해주세요.");
+    return;
+  }
+
+  appendLog(`[AUTH] 유저 ${userId} 접속 시도...`, "info");
+  
+  // 데이터 동기화 시도
+  await updateAIVisualization(userId);
+  
+  // 데이터 로드가 성공적이라 가정하고 로그인 처리 (실제로는 API 응답에 따라 조건문 처리 권장)
+  isLoggedIn = true;
+  updateUIByLoginStatus();
+  appendLog(`[AUTH] 로그인 성공. 세션이 시작되었습니다.`, "ok");
+}
+
+// 로그아웃 함수
+function logout() {
+  if (!confirm("로그아웃 하시겠습니까?")) return;
+
+  isLoggedIn = false;
+  // 데이터 초기화
+  QUESTIONS = [];
+  answered = [];
+  document.getElementById("userInputId").value = "";
+  
+  // UI 초기화
+  updateUIByLoginStatus();
+  appendLog(`[AUTH] 로그아웃 되었습니다.`, "system");
+  
+  // 첫 페이지(대시보드)로 강제 이동
+  switchTab('dashboard');
+}
+
+
+// 로그인 상태에 따른 UI 가시성 제어
+function updateUIByLoginStatus() {
+  const loginOverlay = document.getElementById("loginOverlay");
+  const mainContent = document.querySelector(".main-content");
+  const sidebarNav = document.querySelector(".sidebar-nav");
+  const sidebarProfile = document.querySelector(".sidebar-profile");
+  const logoutBtnWrap = document.getElementById("logoutBtnWrap");
+
+  if (isLoggedIn) {
+    loginOverlay.style.display = "none";
+    mainContent.style.opacity = "1";
+    mainContent.style.pointerEvents = "auto";
+    sidebarNav.style.display = "block";
+    sidebarProfile.style.display = "flex";
+    logoutBtnWrap.style.display = "block";
+  } else {
+    loginOverlay.style.display = "flex";
+    mainContent.style.opacity = "0.1"; // 살짝 보이게 하거나 아예 none 처리
+    mainContent.style.pointerEvents = "none";
+    sidebarNav.style.display = "none";
+    sidebarProfile.style.display = "none";
+    logoutBtnWrap.style.display = "none";
+  }
+}
+
+
 async function loadQuestionsFromSupabase() {
   appendLog("[SYSTEM] 데이터베이스에서 문항 동기화 중...", "info");
 
@@ -1128,7 +1193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   animateSyncBars();
   await loadQuestionsFromSupabase();
   startAmbientLogs();
-
+  updateUIByLoginStatus(); // 초기 비로그인 상태 세팅
   updateAIVisualization("115");
   setTimeout(() => {
     const correctEl = document.getElementById("correctCount");
@@ -1165,6 +1230,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     "color:#7c3aed;font-size:12px;",
   );
 });
+
 window.switchTab = switchTab;
 window.loadTargetUser = loadTargetUser;
 window.prevQuestion = prevQuestion;
