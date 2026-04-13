@@ -2,7 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import supabase
 from pydantic import BaseModel
+from dotenv import load_dotenv
 app = FastAPI(title="Twin Edu API")
+import google as genai
+import os
+
+load_dotenv()
+
+GEMINI_API_KEY = os.environ.get("VITE_GEMINI_API_KEY")
+# OpenAI 클라이언트 초기화
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # 프론트엔드 연결 허용 (CORS)
 app.add_middleware(
@@ -34,6 +43,35 @@ class SignupRequest(BaseModel):
     name: str
     school_name: str = "미지정 학교"
 
+@app.post("/api/ai-advice")
+async def get_ai_advice(data: dict):
+    try:
+        wrong_topics = data.get("wrong_topics", [])
+        
+        if not wrong_topics:
+            return {"advice": "완벽합니다! 모든 영역에서 뛰어난 숙련도를 보여주고 계시네요. 현재의 학습 텐션을 유지하세요."}
+
+        # Gemini 프롬프트 구성
+        prompt = f"""
+        역할: 너는 학습자의 데이터를 분석하는 냉철한 영어 교육 AI 트윈이야.
+        상황: 사용자가 테스트에서 다음 영역들을 틀렸어: {', '.join(wrong_topics)}.
+        요청: 이 데이터를 기반으로 사용자에게 아주 날카롭고 전문적인 학습 조언을 3문장 이내로 해줘.
+        지침: 말투는 '~입니다'체를 사용하고, 동기부여보다는 '구조적 분석'이나 '패턴 학습' 같은 실무적인 조언 위주로 작성할 것.
+        """
+
+        # Gemini 답변 생성
+        response = client.models.generate_content(
+            model='gemini-flash-latest', 
+            contents=prompt
+        )
+        
+        return {"advice": response.text.strip()}
+        
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        # 에러 발생 시 Fallback (마감 방어용)
+        topic = wrong_topics[0] if wrong_topics else "해당"
+        return {"advice": f"{topic} 영역의 문장 구조 파악이 미흡합니다. 핵심 성분 찾기 연습을 통해 오답 패턴을 교정하세요."}
 @app.post("/api/signup")
 def signup_user(data: SignupRequest):
     try:

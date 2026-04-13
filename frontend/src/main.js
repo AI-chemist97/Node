@@ -743,11 +743,15 @@ function showFinalLoadingAndGoToReport() {
   }, 3000);
 }
 
-function renderFinalReport() {
+async function renderFinalReport() {
   const reportTab = document.getElementById("tab-report");
   const correctCount = answered.filter((a) => a === "correct").length;
   const total = QUESTIONS.length;
   const score = Math.round((correctCount / total) * 100);
+  // 틀린 카테고리만 추출
+  const wrongCategories = QUESTIONS.filter(
+    (_, i) => answered[i] === "wrong",
+  ).map((q) => q.type.split(" · ")[0]);
 
   reportTab.innerHTML = `
     <div class="settings-container">
@@ -783,6 +787,31 @@ function renderFinalReport() {
         </div>
       </div>
     </div>
+  `;
+  // AI API 호출 (백엔드)
+  let aiAdvice = "";
+  try {
+    const aiRes = await fetch(`${API_BASE_URL}/api/ai-advice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wrong_topics: wrongCategories }),
+    });
+    const aiData = await aiRes.json();
+    aiAdvice = aiData.advice;
+  } catch (err) {
+    aiAdvice =
+      "문법 및 구조 분석 결과, 특정 유형의 반복 실수가 감지되었습니다. 취약 구간에 대한 집중 복습이 필요합니다.";
+  }
+  // 화면 렌더링
+  reportTab.innerHTML = `
+    <div class="settings-container">
+       <div class="hero-section" style="...">
+          </div>
+       <div class="section-card" style="border-left: 5px solid var(--blue);">
+          <div class="card-header"><h2 class="card-title">🤖 AI 트윈의 실시간 총평</h2></div>
+          <p>"${aiAdvice}"</p>
+       </div>
+       </div>
   `;
 }
 /* ──────────────────────────────────────────
