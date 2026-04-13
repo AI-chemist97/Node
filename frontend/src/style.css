@@ -2260,6 +2260,9 @@ body {
 /* 모바일에서 왼쪽 사이드바 강제 제거 및 메인 밀착 */
 @media screen and (max-width: 768px) {
   /* 1. 왼쪽 사이드바를 화면 밖으로 치우지 말고 아예 숨김 */
+  .sidebar-nav {
+    display: none !important; 
+  }
   .sidebar {
     display: none !important; 
   }
