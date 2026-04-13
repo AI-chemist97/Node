@@ -13,7 +13,24 @@ const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-window.login = login;
+window.login = async () => {
+  // 오버레이에 있는 입력창에서 ID를 가져옴
+  const userId = document.getElementById("userInputId").value.trim();
+  
+  if (!userId) {
+    alert("유저 ID를 입력해주세요.");
+    return;
+  }
+
+  appendLog(`[AUTH] 유저 ${userId} 접속 시도...`, "info");
+  
+  // 데이터 로드
+  await updateAIVisualization(userId);
+  await loadQuestionsFromSupabase();
+
+  isLoggedIn = true;
+  updateUIByLoginStatus(); // 화면 잠금 해제
+};
 window.logout = logout;
 window.supabase = supabase;
 window.Chart = Chart;
