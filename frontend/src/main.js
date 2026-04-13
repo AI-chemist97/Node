@@ -16,14 +16,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 window.login = async () => {
   // 오버레이에 있는 입력창에서 ID를 가져옴
   const userId = document.getElementById("userInputId").value.trim();
-  
+
   if (!userId) {
     alert("유저 ID를 입력해주세요.");
     return;
   }
 
   appendLog(`[AUTH] 유저 ${userId} 접속 시도...`, "info");
-  
+
   // 데이터 로드
   await updateAIVisualization(userId);
   await loadQuestionsFromSupabase();
@@ -48,10 +48,10 @@ async function login() {
   }
 
   appendLog(`[AUTH] 유저 ${userId} 접속 시도...`, "info");
-  
+
   // 데이터 동기화 시도
   await updateAIVisualization(userId);
-  
+
   // 데이터 로드가 성공적이라 가정하고 로그인 처리 (실제로는 API 응답에 따라 조건문 처리 권장)
   isLoggedIn = true;
   updateUIByLoginStatus();
@@ -67,21 +67,20 @@ function logout() {
   QUESTIONS = [];
   answered = [];
   document.getElementById("userInputId").value = "";
-  
+
   // UI 초기화
   updateUIByLoginStatus();
   appendLog(`[AUTH] 로그아웃 되었습니다.`, "system");
-  
-  // 첫 페이지(대시보드)로 강제 이동
-  switchTab('dashboard');
-}
 
+  // 첫 페이지(대시보드)로 강제 이동
+  switchTab("dashboard");
+}
 
 // 로그인 상태에 따른 UI 가시성 제어
 function updateUIByLoginStatus() {
   const loginOverlay = document.getElementById("loginOverlay");
   const mainContent = document.querySelector(".main-content");
-  const sidebarNav = document.querySelector(".sidebar-nav");
+  // const sidebarNav = document.querySelector(".sidebar-nav");
   const logoutBtnWrap = document.getElementById("logoutBtnWrap");
 
   if (isLoggedIn) {
@@ -90,24 +89,22 @@ function updateUIByLoginStatus() {
     loginOverlay.style.display = "none";
     mainContent.style.opacity = "1";
     mainContent.style.pointerEvents = "auto";
-    sidebarNav.style.display = "block";
-    if(logoutBtnWrap) logoutBtnWrap.style.display = "block";
-    
+    // sidebarNav.style.display = "block";
+    if (logoutBtnWrap) logoutBtnWrap.style.display = "block";
+
     // 모바일 전용: 로그인 성공하면 상단 입력창 구역을 아예 날려버림 (선택사항)
     const authArea = document.querySelector(".sidebar-auth-area");
-    if(authArea) authArea.style.display = "none";
-
+    if (authArea) authArea.style.display = "none";
   } else {
     // 2. 로그아웃 상태
     document.body.classList.remove("logged-in"); // 클래스 제거
     loginOverlay.style.display = "flex";
     mainContent.style.opacity = "0.1";
     mainContent.style.pointerEvents = "none";
-    sidebarNav.style.display = "none";
-    if(logoutBtnWrap) logoutBtnWrap.style.display = "none";
+    // sidebarNav.style.display = "none";
+    if (logoutBtnWrap) logoutBtnWrap.style.display = "none";
   }
 }
-
 
 async function loadQuestionsFromSupabase() {
   appendLog("[SYSTEM] 데이터베이스에서 문항 동기화 중...", "info");
@@ -690,8 +687,13 @@ async function selectOption(btn, isCorrect, optIdx) {
   const q = QUESTIONS[currentQ];
   const allBtns = document.querySelectorAll(".q-opt-btn");
 
-  allBtns.forEach((b) => b.disabled = true);
-  if (b.dataset.correct === "true") b.classList.add("correct");
+  allBtns.forEach((b) => {
+    b.disabled = true;
+    // 정답인 버튼은 무조건 초록색(correct)으로 표시 (사용자 선택 여부 상관없이)
+    if (b.dataset.correct === "true") {
+      b.classList.add("correct");
+    }
+  });
   if (!isCorrect) btn.classList.add("wrong");
 
   answered[currentQ] = isCorrect ? "correct" : "wrong";
@@ -708,7 +710,10 @@ async function selectOption(btn, isCorrect, optIdx) {
     // 다음 문제가 있을 때: 1.5초 후 자동으로 다음 문제 이동 (사용자 편의성)
     setTimeout(() => {
       nextQuestion();
-      appendLog(`[SYSTEM] 다음 문항 Q.${QUESTIONS[currentQ].num} 분석 시작`, "info");
+      appendLog(
+        `[SYSTEM] 다음 문항 Q.${QUESTIONS[currentQ].num} 분석 시작`,
+        "info",
+      );
     }, 1500);
   }
 }
@@ -718,7 +723,7 @@ async function selectOption(btn, isCorrect, optIdx) {
 ────────────────────────────────────────── */
 function showFinalLoadingAndGoToReport() {
   const simulatorTab = document.getElementById("tab-simulator");
-  
+
   // 1. 시뮬레이터 화면을 로딩 상태로 변경
   simulatorTab.innerHTML = `
     <div class="placeholder-section">
@@ -733,14 +738,14 @@ function showFinalLoadingAndGoToReport() {
 
   // 2. 3초 뒤에 리포트 탭으로 강제 이동
   setTimeout(() => {
-    switchTab('report');
+    switchTab("report");
     renderFinalReport(); // 리포트 내용 렌더링 함수 호출
   }, 3000);
 }
 
 function renderFinalReport() {
   const reportTab = document.getElementById("tab-report");
-  const correctCount = answered.filter(a => a === "correct").length;
+  const correctCount = answered.filter((a) => a === "correct").length;
   const total = QUESTIONS.length;
   const score = Math.round((correctCount / total) * 100);
 
@@ -772,7 +777,7 @@ function renderFinalReport() {
         <div class="section-card">
           <div class="card-header"><h2 class="card-title">AI 집중 권고 사항</h2></div>
           <ul class="modal-solution" style="list-style: none; padding: 0;">
-            ${score < 100 ? '<li>⚠️ 오답 문항의 패턴 분석 결과, 특정 유형의 반복 실수가 감지되었습니다.</li>' : '<li>✅ 모든 유형에서 완벽한 숙련도를 보이고 있습니다.</li>'}
+            ${score < 100 ? "<li>⚠️ 오답 문항의 패턴 분석 결과, 특정 유형의 반복 실수가 감지되었습니다.</li>" : "<li>✅ 모든 유형에서 완벽한 숙련도를 보이고 있습니다.</li>"}
             <li>취약 영역 점수 동기화가 서버에 완료되었습니다.</li>
           </ul>
         </div>
@@ -785,14 +790,14 @@ function renderFinalReport() {
 ────────────────────────────────────────── */
 async function syncScoreToServer(isCorrect, category) {
   const userId = document.getElementById("userInputId")?.value.trim() || "115";
-  
+
   // 5개 카테고리 컬럼명 매핑
   const fieldMap = {
-    "문법": "grammar_score",
-    "독해": "reading_score",
-    "어휘": "vocabulary_score",
-    "구조": "structure_score",
-    "논리": "logic_score"
+    문법: "grammar_score",
+    독해: "reading_score",
+    어휘: "vocabulary_score",
+    구조: "structure_score",
+    논리: "logic_score",
   };
 
   const columnName = fieldMap[category] || "grammar_score";
@@ -806,14 +811,14 @@ async function syncScoreToServer(isCorrect, category) {
       body: JSON.stringify({
         field: columnName,
         is_correct: isCorrect,
-        inc_value: isCorrect ? 0.05 : -0.02 // 정답 시 +5%, 오답 시 -2%
+        inc_value: isCorrect ? 0.05 : -0.02, // 정답 시 +5%, 오답 시 -2%
       }),
     });
 
     if (response.ok) {
       appendLog(`[SUCCESS] AI 트윈 데이터 동기화 완료`, "ok");
       // 데이터가 바뀌었으므로 대시보드(차트 등)를 비동기로 다시 그림
-      await updateAIVisualization(userId); 
+      await updateAIVisualization(userId);
     }
   } catch (err) {
     console.error("Score Sync Error:", err);
@@ -824,26 +829,45 @@ async function syncScoreToServer(isCorrect, category) {
    실시간 데이터 업데이트 로직 (새로 추가)
 ────────────────────────────────────────── */
 function updateLiveDashboard() {
-  const correctCount = answered.filter(a => a === "correct").length;
-  const wrongCount = answered.filter(a => a === "wrong").length;
-  
+  const correctCount = answered.filter((a) => a === "correct").length;
+  const wrongCount = answered.filter((a) => a === "wrong").length;
+
   // 1. 상단 통계 카드 업데이트 (애니메이션 효과 포함)
   const correctEl = document.getElementById("correctCount");
   const riskEl = document.getElementById("riskCount");
-  
-  if (correctEl) animateNumber(correctEl, parseInt(correctEl.textContent) || 0, correctCount, 600, "");
+
+  if (correctEl)
+    animateNumber(
+      correctEl,
+      parseInt(correctEl.textContent) || 0,
+      correctCount,
+      600,
+      "",
+    );
   if (riskEl) {
-     // 오답 위험 건수를 현재 오답 수에 따라 실시간 조정 (가상 로직)
-     const currentRiskItems = QUESTIONS.length - (correctCount + wrongCount);
-     animateNumber(riskEl, parseInt(riskEl.textContent) || 0, wrongCount, 600, "");
+    // 오답 위험 건수를 현재 오답 수에 따라 실시간 조정 (가상 로직)
+    const currentRiskItems = QUESTIONS.length - (correctCount + wrongCount);
+    animateNumber(
+      riskEl,
+      parseInt(riskEl.textContent) || 0,
+      wrongCount,
+      600,
+      "",
+    );
   }
 
   // 2. 트윈 싱크율 실시간 재계산
   const syncPercentEl = document.getElementById("syncPercent");
   if (syncPercentEl) {
     const baseSync = 87; // 초기값
-    const newSync = baseSync + (correctCount * 1.2) - (wrongCount * 0.8);
-    animateNumber(syncPercentEl, parseInt(syncPercentEl.textContent) || 0, Math.round(newSync), 800, "");
+    const newSync = baseSync + correctCount * 1.2 - wrongCount * 0.8;
+    animateNumber(
+      syncPercentEl,
+      parseInt(syncPercentEl.textContent) || 0,
+      Math.round(newSync),
+      800,
+      "",
+    );
   }
 
   // 3. 터미널 추가 분석 로그
@@ -991,14 +1015,14 @@ function typeLog(text, type, callback) {
   const line = document.createElement("div");
   line.className = `log-line log-${type} log-cursor`;
   terminal.appendChild(line);
-  
+
   // 자동 스크롤
   terminal.scrollTop = terminal.scrollHeight;
 
   let i = 0;
   // 속도 조절: 한글 포함 여부에 따라 속도 최적화
-  const speed = 15; 
-  
+  const speed = 15;
+
   const timer = setInterval(() => {
     line.textContent = text.slice(0, i + 1);
     i++;
@@ -1036,12 +1060,14 @@ function openAnalysisModal() {
   const ul = document.getElementById("modalSolutions");
 
   // 1. 텍스트 및 데이터 바인딩
-  document.getElementById("modalTitle").textContent = `Q.${q.num} 오답 원인 분석`;
-  document.getElementById("modalRiskBadge").textContent = `오답 확률 ${q.risk}%`;
+  document.getElementById("modalTitle").textContent =
+    `Q.${q.num} 오답 원인 분석`;
+  document.getElementById("modalRiskBadge").textContent =
+    `오답 확률 ${q.risk}%`;
   document.getElementById("modalReason").textContent = q.reason;
 
   // 2. 솔루션 리스트 초기화 및 생성 (성능 최적화 버전)
-  ul.innerHTML = ""; 
+  ul.innerHTML = "";
   const fragment = document.createDocumentFragment();
   q.solutions.forEach((s) => {
     const li = document.createElement("li");
@@ -1140,8 +1166,7 @@ window.saveProfile = async () => {
     // 설정 페이지 프로필 카드 업데이트
     if (document.getElementById("profileCardName")) {
       document.getElementById("profileCardInitial").textContent = initial;
-      document.getElementById("profileCardName").textContent =
-        profileData.name;
+      document.getElementById("profileCardName").textContent = profileData.name;
       document.getElementById("profileCardDetail").textContent =
         `고등학교 ${profileData.grade}학년 · ${profileData.region}`;
       document.getElementById("profileCardGoal").textContent =
@@ -1163,10 +1188,18 @@ window.saveProfile = async () => {
 };
 // 회원가입/로그인 UI 전환
 window.toggleAuthMode = (isSignup) => {
-  document.getElementById("loginFields").style.display = isSignup ? "none" : "block";
-  document.getElementById("signupFields").style.display = isSignup ? "block" : "none";
-  document.getElementById("authTitle").textContent = isSignup ? "트윈 만들기" : "환영합니다!";
-  document.getElementById("authSub").textContent = isSignup ? "기초 정보를 입력하고 AI 분석을 시작하세요." : "AI 디지털 트윈 학습을 위해 로그인하세요.";
+  document.getElementById("loginFields").style.display = isSignup
+    ? "none"
+    : "block";
+  document.getElementById("signupFields").style.display = isSignup
+    ? "block"
+    : "none";
+  document.getElementById("authTitle").textContent = isSignup
+    ? "트윈 만들기"
+    : "환영합니다!";
+  document.getElementById("authSub").textContent = isSignup
+    ? "기초 정보를 입력하고 AI 분석을 시작하세요."
+    : "AI 디지털 트윈 학습을 위해 로그인하세요.";
 };
 
 // 회원가입 처리
@@ -1174,17 +1207,17 @@ window.handleSignup = async () => {
   const id = document.getElementById("signupId").value.trim();
   const name = document.getElementById("signupName").value.trim();
 
-  if(!id || !name) return alert("모든 항목을 입력해주세요.");
+  if (!id || !name) return alert("모든 항목을 입력해주세요.");
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: id, name: name })
+      body: JSON.stringify({ user_id: id, name: name }),
     });
-    
+
     const data = await res.json();
-    if(data.error) throw new Error(data.error);
+    if (data.error) throw new Error(data.error);
 
     alert("회원가입이 완료되었습니다! 생성된 ID로 로그인해주세요.");
     toggleAuthMode(false); // 로그인 모드로 전환

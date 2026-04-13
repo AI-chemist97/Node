@@ -7,7 +7,8 @@ app = FastAPI(title="Twin Edu API")
 # 프론트엔드 연결 허용 (CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
+    allow_credentials=True, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
