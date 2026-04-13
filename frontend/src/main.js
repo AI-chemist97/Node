@@ -895,11 +895,11 @@ window.saveProfile = async () => {
     console.log("서버 저장 완료:", result);
 
     // 3. UI 요소 즉시 업데이트
-    const initial = profileData.user_name.charAt(0);
+    const initial = profileData.name.charAt(0);
 
     // 사이드바 업데이트
     document.getElementById("profileInitial").textContent = initial;
-    document.getElementById("profileName").textContent = profileData.user_name;
+    document.getElementById("profileName").textContent = profileData.name;
     document.getElementById("profileGrade").textContent =
       `고등학교 ${profileData.grade}학년`;
 
@@ -907,7 +907,7 @@ window.saveProfile = async () => {
     if (document.getElementById("profileCardName")) {
       document.getElementById("profileCardInitial").textContent = initial;
       document.getElementById("profileCardName").textContent =
-        profileData.user_name;
+        profileData.name;
       document.getElementById("profileCardDetail").textContent =
         `고등학교 ${profileData.grade}학년 · ${profileData.region}`;
       document.getElementById("profileCardGoal").textContent =
@@ -916,7 +916,7 @@ window.saveProfile = async () => {
 
     // 성공 로그 및 효과
     if (typeof updateSyncRing === "function") updateSyncRing();
-    appendLog(`[SUCCESS] 서버 동기화 완료 — ${profileData.user_name}`, "twin");
+    appendLog(`[SUCCESS] 서버 동기화 완료 — ${profileData.name}`, "twin");
     if (typeof showSaveStatus === "function") showSaveStatus();
 
     // 모달 닫기
